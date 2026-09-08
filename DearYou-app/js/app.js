@@ -28,43 +28,42 @@ window.dearyouApp = function dearyouApp() {
 
     projects: [],
 
-    initSupabase() {
+    initSupabase: function() {
       try {
         if (window.supabase && typeof window.supabase.createClient === 'function') {
-          const SUPABASE_URL = 'https://ztmhdeownjvzgtzpdlwv.supabase.co';
-          const SUPABASE_ANON_KEY = 'sb_publishable_ZDReMFXmZPQxvKGQlu2NfQ_dWqpdrMt';
+          var SUPABASE_URL = 'https://ztmhdeownjvzgtzpdlwv.supabase.co';
+          var SUPABASE_ANON_KEY = 'sb_publishable_ZDReMFXmZPQxvKGQlu2NfQ_dWqpdrMt';
           this.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } else {
-          console.warn('Supabase SDK tidak dimuat.');
         }
       } catch (e) {
-        console.error('Inisialisasi Supabase gagal:', e);
+        console.error('Supabase error:', e);
       }
     },
 
-    async initApp() {
+    initApp: async function() {
       this.initSupabase();
 
       try {
         if (this.supabaseClient) {
-          const { data } = await this.supabaseClient.auth.getUser();
-          if (data && data.user) {
-            this.currentUser = data.user;
+          var authRes = await this.supabaseClient.auth.getUser();
+          if (authRes && authRes.data && authRes.data.user) {
+            this.currentUser = authRes.data.user;
           }
         }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const slugParam = urlParams.get('slug');
+        var urlParams = new URLSearchParams(window.location.search);
+        var slugParam = urlParams.get('slug');
 
         if (slugParam && this.supabaseClient) {
           this.isLoading = true;
-          const { data, error } = await this.supabaseClient
+          var res = await this.supabaseClient
             .from('projects')
             .select('*')
             .eq('slug', slugParam)
             .single();
 
-          if (data && !error) {
+          if (res.data && !res.error) {
+            var data = res.data;
             this.activeProject = {
               id: data.id,
               slug: data.slug,
@@ -76,13 +75,12 @@ window.dearyouApp = function dearyouApp() {
               photos: (data.photos && data.photos.length) ? data.photos : ['https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'],
               message: data.message,
               status: data.status,
-              isPublic: data.is_public ?? false,
+              isPublic: typeof data.is_public !== 'undefined' ? data.is_public : false,
               userId: data.user_id
             };
             this.viewMode = 'public';
             setTimeout(() => this.triggerConfetti(), 800);
           } else {
-            alert('Ucapan tidak ditemukan!');
             this.viewMode = 'dashboard';
             await this.fetchProjects();
           }
@@ -91,17 +89,17 @@ window.dearyouApp = function dearyouApp() {
           await this.fetchProjects();
         }
       } catch (err) {
-        console.error('Error saat initApp:', err);
+        console.error('Error initApp:', err);
         this.isLoading = false;
       }
     },
 
-    async switchTab(tabName) {
+    switchTab: async function(tabName) {
       this.activeTab = tabName;
       await this.fetchProjects();
     },
 
-    async fetchProjects() {
+    fetchProjects: async function() {
       if (!this.supabaseClient) {
         this.projects = [];
         return;
@@ -109,7 +107,7 @@ window.dearyouApp = function dearyouApp() {
 
       this.isLoading = true;
       try {
-        let query = this.supabaseClient
+        var query = this.supabaseClient
           .from('projects')
           .select('*')
           .order('created_at', { ascending: false });
@@ -126,41 +124,42 @@ window.dearyouApp = function dearyouApp() {
           query = query.eq('is_public', true);
         }
 
-        const { data, error } = await query;
-
-        if (!error && data) {
-          this.projects = data.map(p => ({
-            id: p.id,
-            slug: p.slug,
-            type: p.type,
-            theme: p.theme || 'vintage_scrapbook',
-            title: p.title,
-            startDate: p.start_date,
-            audioUrl: p.audio_url,
-            photos: p.photos || [],
-            message: p.message,
-            status: p.status,
-            isPublic: p.is_public ?? false,
-            userId: p.user_id
-          }));
+        var res = await query;
+        if (!res.error && res.data) {
+          this.projects = res.data.map(function(p) {
+            return {
+              id: p.id,
+              slug: p.slug,
+              type: p.type,
+              theme: p.theme || 'vintage_scrapbook',
+              title: p.title,
+              startDate: p.start_date,
+              audioUrl: p.audio_url,
+              photos: p.photos || [],
+              message: p.message,
+              status: p.status,
+              isPublic: typeof p.is_public !== 'undefined' ? p.is_public : false,
+              userId: p.user_id
+            };
+          });
         }
       } catch (err) {
-        console.error('Gagal mengambil data proyek:', err);
+        console.error('Fetch error:', err);
       }
       this.isLoading = false;
     },
 
-    showToast(message) {
+    showToast: function(message) {
       this.toastMessage = message;
       this.copiedToast = true;
       setTimeout(() => { this.copiedToast = false; }, 3000);
     },
 
-    createNewProject(type = 'anniversary') {
+    createNewProject: function(type) {
       this.activeProject = {
         id: 'project-' + Date.now(),
         slug: 'ucapan-' + Date.now().toString().slice(-6),
-        type: type,
+        type: type || 'anniversary',
         theme: 'vintage_scrapbook',
         title: '',
         startDate: new Date().toISOString().split('T')[0],
@@ -174,21 +173,18 @@ window.dearyouApp = function dearyouApp() {
       this.viewMode = 'editor';
     },
 
-    editProject(project) {
+    editProject: function(project) {
       this.activeProject = JSON.parse(JSON.stringify(project));
       this.viewMode = 'editor';
     },
 
-    async saveProject(status) {
-      if (!this.supabaseClient) {
-        alert('Database belum terhubung.');
-        return;
-      }
+    saveProject: async function(status) {
+      if (!this.supabaseClient) return;
 
       this.activeProject.status = status;
       this.isLoading = true;
 
-      const payload = {
+      var payload = {
         id: this.activeProject.id,
         slug: this.activeProject.slug,
         type: this.activeProject.type,
@@ -203,32 +199,28 @@ window.dearyouApp = function dearyouApp() {
         user_id: this.currentUser ? this.currentUser.id : null
       };
 
-      const { error } = await this.supabaseClient
+      var res = await this.supabaseClient
         .from('projects')
         .upsert(payload, { onConflict: 'id' });
 
-      if (error) {
-        alert('Gagal menyimpan: ' + error.message);
+      if (res.error) {
+        alert('Gagal menyimpan: ' + res.error.message);
       } else {
-        this.showToast('Ucapan berhasil disimpan! ☁️');
+        this.showToast('Ucapan tersimpan! ☁️');
         await this.fetchProjects();
         this.viewMode = 'dashboard';
       }
       this.isLoading = false;
     },
 
-    async deleteProject(id) {
+    deleteProject: async function(id) {
       if (!this.supabaseClient) return;
 
-      if (confirm('Apakah Anda yakin ingin menghapus ucapan ini?')) {
+      if (confirm('Yakin ingin menghapus ucapan ini?')) {
         this.isLoading = true;
-        const { error } = await this.supabaseClient
-          .from('projects')
-          .delete()
-          .eq('id', id);
-
-        if (error) {
-          alert('Gagal menghapus: ' + error.message);
+        var res = await this.supabaseClient.from('projects').delete().eq('id', id);
+        if (res.error) {
+          alert('Gagal menghapus: ' + res.error.message);
         } else {
           this.showToast('Ucapan berhasil dihapus.');
           await this.fetchProjects();
@@ -237,7 +229,7 @@ window.dearyouApp = function dearyouApp() {
       }
     },
 
-    openPreview(project) {
+    openPreview: function(project) {
       this.activeProject = JSON.parse(JSON.stringify(project));
       this.isPreviewFromEditor = (this.viewMode === 'editor');
       this.viewMode = 'public';
@@ -245,8 +237,8 @@ window.dearyouApp = function dearyouApp() {
       setTimeout(() => this.triggerConfetti(), 500);
     },
 
-    goBackFromPreview() {
-      const audioEl = document.getElementById('bgAudio');
+    goBackFromPreview: function() {
+      var audioEl = document.getElementById('bgAudio');
       if (audioEl) audioEl.pause();
       this.isAudioPlaying = false;
 
@@ -258,31 +250,28 @@ window.dearyouApp = function dearyouApp() {
       this.isPreviewFromEditor = false;
     },
 
-    async copyShareLink(project = null) {
-      const targetProject = project || this.activeProject;
-      if (!targetProject || !targetProject.slug) return;
+    copyShareLink: async function(project) {
+      var target = project || this.activeProject;
+      if (!target || !target.slug) return;
 
-      const shareUrl = `${window.location.origin}${window.location.pathname}?slug=${targetProject.slug}`;
+      var shareUrl = window.location.origin + window.location.pathname + '?slug=' + target.slug;
 
       if (navigator.clipboard && window.isSecureContext) {
         try {
           await navigator.clipboard.writeText(shareUrl);
-          this.showToast('Link ucapan disalin ke clipboard! 📋');
+          this.showToast('Link ucapan berhasil disalin! 📋');
           return;
-        } catch (err) {
-          console.warn('Fallback clipboard...', err);
-        }
+        } catch (err) {}
       }
-
       prompt('Salin link ucapan berikut:', shareUrl);
     },
 
-    addPhoto() {
+    addPhoto: function() {
       if (!this.activeProject.photos) this.activeProject.photos = [];
       this.activeProject.photos.push('https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800');
     },
 
-    removePhoto(index) {
+    removePhoto: function(index) {
       if (this.activeProject.photos.length > 1) {
         this.activeProject.photos.splice(index, 1);
       } else {
@@ -290,8 +279,8 @@ window.dearyouApp = function dearyouApp() {
       }
     },
 
-    toggleAudio() {
-      const audioEl = document.getElementById('bgAudio');
+    toggleAudio: function() {
+      var audioEl = document.getElementById('bgAudio');
       if (!audioEl) return;
 
       if (this.isAudioPlaying) {
@@ -301,29 +290,29 @@ window.dearyouApp = function dearyouApp() {
         audioEl.play().then(() => {
           this.isAudioPlaying = true;
         }).catch(() => {
-          alert('Audio gagal diputar.');
+          alert('Audio tidak dapat diputar.');
         });
       }
     },
 
-    triggerConfetti() {
+    triggerConfetti: function() {
       if (typeof confetti === 'function') {
         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       }
     },
 
-    calculateDays(startDateStr) {
+    calculateDays: function(startDateStr) {
       if (!startDateStr) return { years: 0, months: 0, days: 0, totalDays: 0 };
-      const start = new Date(startDateStr);
-      const today = new Date();
+      var start = new Date(startDateStr);
+      var today = new Date();
 
-      let years = today.getFullYear() - start.getFullYear();
-      let months = today.getMonth() - start.getMonth();
-      let days = today.getDate() - start.getDate();
+      var years = today.getFullYear() - start.getFullYear();
+      var months = today.getMonth() - start.getMonth();
+      var days = today.getDate() - start.getDate();
 
       if (days < 0) {
         months--;
-        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        var prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
         days += prevMonth.getDate();
       }
       if (months < 0) {
@@ -331,8 +320,8 @@ window.dearyouApp = function dearyouApp() {
         months += 12;
       }
 
-      const diffTime = Math.abs(today - start);
-      const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      var diffTime = Math.abs(today - start);
+      var totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
       return {
         years: Math.max(0, years),
@@ -342,25 +331,21 @@ window.dearyouApp = function dearyouApp() {
       };
     },
 
-    getBadgeText(type) {
-      switch (type) {
-        case 'birthday': return 'Birthday Special 🎂';
-        case 'valentine': return 'Valentine Moment 🌹';
-        default: return 'Anniversary Love ❤️';
-      }
+    getBadgeText: function(type) {
+      if (type === 'birthday') return 'Birthday Special 🎂';
+      if (type === 'valentine') return 'Valentine Moment 🌹';
+      return 'Anniversary Love ❤️';
     },
 
-    getCounterTitle(type) {
-      switch (type) {
-        case 'birthday': return 'Usia Saat Ini';
-        case 'valentine': return 'Momen Kasih Sayang Bersama';
-        default: return 'Telah Bersama Selama';
-      }
+    getCounterTitle: function(type) {
+      if (type === 'birthday') return 'Usia Saat Ini';
+      if (type === 'valentine') return 'Momen Kasih Sayang';
+      return 'Telah Bersama Selama';
     },
 
-    formatDate(dateStr) {
+    formatDate: function(dateStr) {
       if (!dateStr) return '';
-      const date = new Date(dateStr);
+      var date = new Date(dateStr);
       return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     }
   };
