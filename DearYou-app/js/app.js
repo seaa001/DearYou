@@ -6,7 +6,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
 function dearyouApp() {
   return {
-    viewMode: 'dashboard', // 'dashboard', 'editor', 'public'
+    viewMode: 'dashboard', // Modes: 'dashboard', 'editor', 'public'
     showOnboarding: false,
     isPreviewFromEditor: false,
     isAudioPlaying: false,
@@ -14,8 +14,8 @@ function dearyouApp() {
     copiedToast: false,
     toastMessage: '',
     isLoading: false,
-    
-    // Model Proyek Aktif
+
+    // Model Data Proyek Aktif
     activeProject: {
       id: null,
       slug: '',
@@ -29,14 +29,15 @@ function dearyouApp() {
       status: 'draft'
     },
 
+    // Array Penyimpan List Proyek
     projects: [],
 
-    // Initializer Aplikasi
+    // Initializer Aplikasi saat web pertama dibuka
     async initApp() {
       const urlParams = new URLSearchParams(window.location.search);
       const slugParam = urlParams.get('slug');
 
-      // Jika URL memiliki parameter ?slug=..., ini adalah Link Si B (Tampilan Publik)
+      // Jika URL memiliki parameter ?slug=..., ini adalah Tampilan Publik Si B
       if (slugParam) {
         this.isLoading = true;
         const { data, error } = await supabaseClient
@@ -62,6 +63,8 @@ function dearyouApp() {
           setTimeout(() => this.triggerConfetti(), 800);
         } else {
           alert('Ucapan tidak ditemukan atau link salah!');
+          this.viewMode = 'dashboard';
+          await this.fetchProjects();
         }
         this.isLoading = false;
       } else {
@@ -70,7 +73,7 @@ function dearyouApp() {
       }
     },
 
-    // Ambil Semua Proyek dari Supabase
+    // Ambil Semua Proyek dari Supabase Database
     async fetchProjects() {
       this.isLoading = true;
       const { data, error } = await supabaseClient
@@ -123,7 +126,7 @@ function dearyouApp() {
       this.viewMode = 'editor';
     },
 
-    // Simpan Ke Supabase Cloud Database
+    // Simpan Ke Supabase Cloud Database (Upsert)
     async saveProject(status) {
       this.activeProject.status = status;
       this.isLoading = true;
@@ -199,11 +202,50 @@ function dearyouApp() {
       this.isPreviewFromEditor = false;
     },
 
-    copyShareLink(project) {
-      const shareUrl = `${window.location.origin}${window.location.pathname}?slug=${project.slug}`;
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        this.showToast('Link ucapan disalin ke clipboard! 📋');
-      });
+    // Fungsi Copy Link Anti-Gagal (Multi Fallback)
+    async copyShareLink(project = null) {
+      const targetProject = project || this.activeProject;
+
+      if (!targetProject || !targetProject.slug) {
+        alert('Data ucapan atau slug tidak ditemukan!');
+        return;
+      }
+
+      const shareUrl = `${window.location.origin}${window.location.pathname}?slug=${targetProject.slug}`;
+
+      // METODE 1: Modern Clipboard API
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(shareUrl);
+          this.showToast('Link ucapan disalin ke clipboard! 📋');
+          return;
+        } catch (err) {
+          console.warn('Clipboard API gagal, mencoba fallback...', err);
+        }
+      }
+
+      // METODE 2: Fallback Textarea untuk Browser HP / In-App Browser TikTok
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          this.showToast('Link ucapan disalin ke clipboard! 📋');
+        } else {
+          prompt('Salin link ucapan berikut:', shareUrl);
+        }
+      } catch (err) {
+        prompt('Salin link ucapan berikut:', shareUrl);
+      }
     },
 
     addPhoto() {
@@ -229,7 +271,7 @@ function dearyouApp() {
         audioEl.play().then(() => {
           this.isAudioPlaying = true;
         }).catch(() => {
-          alert('Gagal memutar audio. Pastikan URL audio dapat diakses.');
+          alert('Gagal memutar audio. Pastikan URL audio valid dan dapat diakses.');
         });
       }
     },
