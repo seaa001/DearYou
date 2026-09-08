@@ -112,6 +112,7 @@
     function dearyouApp() {
       return {
         viewMode: 'dashboard',
+        dashboardTab: 'my', // Mode dashboard: 'my' (Milik Saya) atau 'global' (Hasil Global)
         isRecipientView: false, // Flag untuk membedakan pembuat vs penerima link
         isAudioPlaying: false,
         activePhotoIndex: 0,
@@ -144,6 +145,54 @@
 
         projects: [],
 
+        // FITUR BARU: KOLEKSI KARTU GLOBAL (KOMUNITAS / PUBLIK)
+        globalProjects: [
+          {
+            id: 'global-1',
+            slug: 'momen-indah-global',
+            type: 'anniversary',
+            theme: 'lovely',
+            title: 'Satu Tahun Bersamamu',
+            startDate: '2023-01-01T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari. Semoga perjalanan cinta kita terus berlanjut hingga nanti.'
+          },
+          {
+            id: 'global-2',
+            slug: 'hbd-sayang-global',
+            type: 'birthday',
+            theme: 'retro',
+            title: 'Happy Birthday My Dearest!',
+            startDate: '2022-08-20T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Selamat ulang tahun! Panjang umur, sehat selalu, dan makin sayang sama aku ya.'
+          },
+          {
+            id: 'global-3',
+            slug: 'valentine-special-global',
+            type: 'valentine',
+            theme: 'doodle',
+            title: 'Happy Valentine\'s Day',
+            startDate: '2024-02-14T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Setiap hari terasa seperti Valentine bersamamu. Love you to the moon and back!'
+          }
+        ],
+
+        // GETTER UNTUK MENAMPILKAN KARTU SESUAI TAB AKTIF
+        get displayedProjects() {
+          return this.dashboardTab === 'global' ? this.globalProjects : this.projects;
+        },
+
         initApp: function() {
           var saved = localStorage.getItem('dearyou_projects_db');
           if (saved) {
@@ -160,9 +209,10 @@
           // JIKA DIBUKA VIA LINK SHARE (PENERIMA / SI B)
           if (slugParam) {
             var found = null;
-            for (var i = 0; i < this.projects.length; i++) {
-              if (this.projects[i].slug === slugParam) {
-                found = this.projects[i];
+            var allProjects = this.projects.concat(this.globalProjects);
+            for (var i = 0; i < allProjects.length; i++) {
+              if (allProjects[i].slug === slugParam) {
+                found = allProjects[i];
                 break;
               }
             }
@@ -244,6 +294,7 @@
 
           this.saveToStorage();
           this.showToast('Kartu ucapan berhasil disimpan.');
+          this.dashboardTab = 'my';
           this.viewMode = 'dashboard';
         },
 
@@ -456,15 +507,31 @@
           </div>
         </div>
 
-        <!-- Title Header -->
-        <div class="flex items-center justify-between pt-2">
-          <h3 class="font-serif font-bold text-lg text-slate-800">Koleksi Kartu Ucapan</h3>
-          <span class="text-xs text-slate-400 font-medium" x-text="projects.length + ' Kartu Tersimpan'"></span>
+        <!-- FITUR BARU: Title Header + Tab Switcher (Hasil Milik Saya vs Hasil Global) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+          <div class="flex items-center gap-3">
+            <h3 class="font-serif font-bold text-lg text-slate-800">Koleksi Kartu Ucapan</h3>
+            <span class="text-xs text-slate-400 font-medium" x-text="displayedProjects.length + (dashboardTab === 'my' ? ' Kartu Tersimpan' : ' Kartu Publik')"></span>
+          </div>
+
+          <!-- TAB SWITCHER MODE -->
+          <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-semibold self-start sm:self-auto">
+            <button @click="dashboardTab = 'my'" 
+                    :class="dashboardTab === 'my' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
+                    class="px-3.5 py-1.5 rounded-lg transition-all">
+              Milik Saya
+            </button>
+            <button @click="dashboardTab = 'global'" 
+                    :class="dashboardTab === 'global' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
+                    class="px-3.5 py-1.5 rounded-lg transition-all">
+              Hasil Global
+            </button>
+          </div>
         </div>
 
         <!-- Grid Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <template x-for="p in projects" :key="p.id">
+          <template x-for="p in displayedProjects" :key="p.id">
             <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4">
               <div>
                 <div class="flex items-center justify-between gap-2">
@@ -484,8 +551,8 @@
                 <button @click="openPreview(p)" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">
                   Buka Kartu
                 </button>
-                <button @click="editProject(p)" class="p-2 text-slate-400 hover:text-slate-700 text-xs" title="Edit">Edit</button>
-                <button @click="deleteProject(p.id)" class="p-2 text-slate-400 hover:text-rose-600 text-xs" title="Hapus">Hapus</button>
+                <button x-show="dashboardTab === 'my'" @click="editProject(p)" class="p-2 text-slate-400 hover:text-slate-700 text-xs" title="Edit">Edit</button>
+                <button x-show="dashboardTab === 'my'" @click="deleteProject(p.id)" class="p-2 text-slate-400 hover:text-rose-600 text-xs" title="Hapus">Hapus</button>
               </div>
             </div>
           </template>
@@ -598,7 +665,6 @@
             </div>
           </template>
         </div>
-
         <div>
           <label class="text-xs font-bold text-slate-700">Pesan Romantis / Surat Cinta</label>
           <textarea x-model="activeProject.message" rows="5" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 leading-relaxed font-medium"></textarea>
@@ -628,7 +694,6 @@
         <audio id="bgAudio" :src="activeProject.audioUrl" loop></audio>
 
         <!-- Top Navigation Bar -->
-        <!-- LOGIK NYATU: Hanya tampil jika SI A (PEMBUAT) yang sedang preview. HILANG jika SI B (PENERIMA) buka link! -->
         <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40">
           <button @click="viewMode = 'dashboard'" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all">
             Dashboard
@@ -645,7 +710,6 @@
         <!-- ================= PEMBUKA KARTU (MENYATU SESUAI TEMA & MOMEN) ================= -->
         <div x-show="!isCardOpened" class="w-full max-w-md my-auto animate-fade-in">
           
-          <!-- CONTAINER PEMBUKA KARTU (DESAIN DISESUAIKAN DENGAN TEMA AKTIF) -->
           <div :class="{
                  'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-8 text-center': activeProject.theme === 'lovely',
                  'bg-white border-2 border-slate-800 shadow-xl rounded-none p-8 text-center relative': activeProject.theme === 'moodboard',
@@ -654,26 +718,19 @@
                  'bg-white border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-8 text-center': activeProject.theme === 'doodle'
                }">
 
-            <!-- Retro Header Title Bar -->
             <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-4 -mx-4 mb-6">
               <span>SPECIAL_PRESENT.EXE</span>
               <span>[X]</span>
             </div>
-
-            <!-- Tape Decor for Moodboard/Vintage/Doodle -->
             <div x-show="activeProject.theme === 'moodboard'" class="washi-tape absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5"></div>
             <div x-show="activeProject.theme === 'vintage'" class="w-8 h-8 border-2 border-dashed border-amber-800/40 absolute top-3 right-3 text-[9px] flex items-center justify-center font-mono">GIFT</div>
 
-            <!-- MOMEN 1: ANNIVERSARY (COKLAT + LOVE + KARTU) -->
+            <!-- MOMEN 1: ANNIVERSARY -->
             <template x-if="activeProject.type === 'anniversary'">
               <div class="space-y-6 flex flex-col items-center">
-                
                 <div class="relative w-28 h-28 flex items-center justify-center animate-float">
-                  <!-- Floating Heart Vectors -->
                   <svg class="w-8 h-8 text-rose-500 absolute -top-2 -left-2 animate-ping" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                   <svg class="w-10 h-10 text-pink-400 absolute -bottom-1 -right-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-
-                  <!-- Chocolate Box Vector -->
                   <svg class="w-24 h-24 text-amber-800 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-4 8c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2H8v-2z"/>
                   </svg>
@@ -699,7 +756,6 @@
                   <p class="text-xs opacity-70">Sentuh tombol di bawah untuk membuka ucapan.</p>
                 </div>
 
-                <!-- Action Button Per Theme -->
                 <button @click="openCardInteractive()" 
                         :class="{
                           'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-lg shadow-pink-200 hover:from-pink-600 hover:to-rose-600': activeProject.theme === 'lovely',
@@ -711,22 +767,16 @@
                         class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
                   Buka Cokelat & Kartu
                 </button>
-
               </div>
             </template>
 
-            <!-- MOMEN 2: ULANG TAHUN (KUE + BALON + KARTU) -->
+            <!-- MOMEN 2: ULANG TAHUN -->
             <template x-if="activeProject.type === 'birthday'">
               <div class="space-y-6 flex flex-col items-center">
-                
                 <div class="relative w-28 h-28 flex items-center justify-center">
                   <svg class="w-8 h-10 text-amber-500 absolute -top-3 -left-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
                   <svg class="w-8 h-10 text-purple-500 absolute -top-2 -right-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-
-                  <!-- Candle Flame -->
                   <div class="w-3 h-5 bg-amber-400 rounded-full absolute -top-1 animate-flame z-20"></div>
-
-                  <!-- Cake Vector -->
                   <svg class="w-24 h-24 text-rose-500 drop-shadow-xl z-10" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 6a1 1 0 0 1 1 1v1h-2V7a1 1 0 0 1 1-1zm9 7v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 2H5v5h14v-5z"/>
                   </svg>
@@ -763,14 +813,12 @@
                         class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
                   Tiup Lilin & Buka Kartu
                 </button>
-
               </div>
             </template>
 
-            <!-- MOMEN 3: VALENTINE (BALON + LOVE + KARTU) -->
+            <!-- MOMEN 3: VALENTINE -->
             <template x-if="activeProject.type === 'valentine'">
               <div class="space-y-6 flex flex-col items-center">
-                
                 <div class="relative w-28 h-28 flex items-center justify-center animate-balloon">
                   <svg class="w-20 h-24 text-rose-500 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -811,7 +859,6 @@
                         class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
                   Buka Kartu Valentine
                 </button>
-
               </div>
             </template>
 
@@ -829,7 +876,6 @@
              }" 
              class="max-w-md w-full my-8 space-y-6 text-center transition-all duration-300">
 
-          <!-- Retro Window Bar -->
           <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-2 -mx-2 mb-4">
             <span>DEARYOU_CARD.EXE</span>
             <span>[X]</span>
@@ -837,7 +883,6 @@
 
           <!-- Header Badge & Title -->
           <div class="space-y-2">
-            
             <span x-show="activeProject.theme === 'lovely'" class="inline-block bg-pink-100 text-pink-700 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
               <span x-text="getBadgeText(activeProject.type)"></span>
             </span>
@@ -858,7 +903,6 @@
               <span x-text="getBadgeText(activeProject.type)"></span>
             </span>
 
-            <!-- Title Typography -->
             <h1 :class="{
                    'font-serif text-2xl md:text-3xl font-bold text-slate-800 mt-2': activeProject.theme === 'lovely',
                    'font-sans text-xl md:text-2xl font-black text-slate-900 mt-2': activeProject.theme === 'moodboard',
@@ -944,96 +988,52 @@
 
             </div>
 
-            <!-- Detailed Time Counter -->
-            <div class="grid grid-cols-3 gap-2 pt-3 mt-3 border-t border-slate-200/50">
-              <div>
-                <span class="text-xs font-bold" x-text="counter.hours"></span>
-                <span class="text-[9px] opacity-70 block">Jam</span>
-              </div>
-              <div>
-                <span class="text-xs font-bold" x-text="counter.minutes"></span>
-                <span class="text-[9px] opacity-70 block">Menit</span>
-              </div>
-              <div>
-                <span class="text-xs font-bold font-mono" x-text="counter.seconds"></span>
-                <span class="text-[9px] opacity-70 block">Detik</span>
-              </div>
+            <div class="mt-3 text-[11px] opacity-80 font-mono flex justify-center gap-2">
+              <span x-text="counter.hours + ' jam'"></span> •
+              <span x-text="counter.minutes + ' menit'"></span> •
+              <span x-text="counter.seconds + ' detik'"></span>
             </div>
-
-            <p class="text-[11px] font-medium pt-2 opacity-80">
-              Total <span x-text="counter.totalDays" class="font-bold"></span> hari indah bersama
-            </p>
           </div>
 
-          <!-- Polaroid Photo Frame -->
-          <div class="relative py-1">
-            <div :class="{
-                   'bg-white p-3 rounded-2xl shadow-lg border border-pink-100': activeProject.theme === 'lovely',
-                   'bg-white p-3 pt-3 pb-8 border border-slate-300 shadow-md rotate-1': activeProject.theme === 'moodboard',
-                   'bg-slate-950 p-2 border-2 border-cyan-400': activeProject.theme === 'retro',
-                   'bg-[#f7f2e7] p-3 pt-3 pb-8 border border-stone-400 shadow-sm -rotate-1': activeProject.theme === 'vintage',
-                   'bg-white p-3 border-2 border-slate-900 shadow-[5px_5px_0px_0px_rgba(15,23,42,1)] rotate-1': activeProject.theme === 'doodle'
-                 }" 
-                 class="mx-auto transition-transform">
-              
-              <img :src="activeProject.photos[activePhotoIndex]" 
-                   :class="{
-                     'rounded-xl': activeProject.theme === 'lovely',
-                     'rounded-none': activeProject.theme !== 'lovely'
-                   }" 
-                   class="w-full h-64 md:h-72 object-cover" />
+          <!-- Photo Gallery -->
+          <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
+            <div class="relative overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 aspect-[4/3]">
+              <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover transition-all duration-300" alt="Moment Photo" />
             </div>
-
-            <!-- Pagination Dots -->
-            <template x-if="activeProject.photos && activeProject.photos.length > 1">
-              <div class="flex items-center justify-center gap-1.5 mt-3">
-                <template x-for="(photo, idx) in activeProject.photos" :key="idx">
-                  <button @click="activePhotoIndex = idx" 
-                          :class="activePhotoIndex === idx ? 'bg-slate-800 w-5' : 'bg-slate-300 w-2'" 
-                          class="h-2 rounded-full transition-all"></button>
-                </template>
-              </div>
-            </template>
+            
+            <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
+              <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                <button @click="activePhotoIndex = idx" 
+                        :class="activePhotoIndex === idx ? 'ring-2 ring-rose-500 scale-105' : 'opacity-60 hover:opacity-100'" 
+                        class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 transition-all">
+                  <img :src="photo" class="w-full h-full object-cover" />
+                </button>
+              </template>
+            </div>
           </div>
 
-          <!-- Message Container -->
+          <!-- Romantic Message -->
           <div :class="{
-                 'bg-white/90 border border-pink-100 text-slate-700 rounded-2xl p-5 shadow-sm': activeProject.theme === 'lovely',
-                 'bg-slate-50 border border-slate-200 text-slate-800 rounded-none p-5': activeProject.theme === 'moodboard',
-                 'bg-slate-950 border border-cyan-400/50 text-cyan-200 rounded-none p-5': activeProject.theme === 'retro',
-                 'bg-[#f6f0e2] border border-amber-900/20 text-stone-800 rounded-none p-5': activeProject.theme === 'vintage',
-                 'bg-amber-50/80 border-2 border-slate-900 text-slate-900 rounded-none p-5': activeProject.theme === 'doodle'
-               }" 
-               class="text-left">
+                 'bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-pink-100 shadow-sm text-left': activeProject.theme === 'lovely',
+                 'bg-amber-50/80 border border-stone-300 rounded-none p-5 text-left relative': activeProject.theme === 'moodboard',
+                 'bg-slate-950 border border-cyan-400/50 rounded-none p-5 text-left font-pixel': activeProject.theme === 'retro',
+                 'bg-[#fdfdfb] border border-stone-300 rounded-none p-5 text-left font-mono': activeProject.theme === 'vintage',
+                 'bg-white border-2 border-slate-900 rounded-none p-5 text-left font-hand': activeProject.theme === 'doodle'
+               }">
             <p :class="{
-                   'font-serif italic text-sm md:text-base leading-relaxed': activeProject.theme === 'lovely',
-                   'font-sans text-xs md:text-sm leading-relaxed': activeProject.theme === 'moodboard',
-                   'font-pixel text-lg leading-snug tracking-wide': activeProject.theme === 'retro',
-                   'font-mono text-xs md:text-sm leading-relaxed': activeProject.theme === 'vintage',
-                   'font-hand text-2xl leading-snug': activeProject.theme === 'doodle'
-                 }" 
-                class="whitespace-pre-line" 
-                x-text="activeProject.message"></p>
+                 'font-serif text-sm leading-relaxed text-slate-700 whitespace-pre-line': activeProject.theme === 'lovely',
+                 'font-sans text-xs leading-relaxed text-slate-800 whitespace-pre-line': activeProject.theme === 'moodboard',
+                 'font-pixel text-sm leading-relaxed text-cyan-200 whitespace-pre-line': activeProject.theme === 'retro',
+                 'font-mono text-xs leading-relaxed text-stone-800 whitespace-pre-line': activeProject.theme === 'vintage',
+                 'font-hand text-lg leading-relaxed text-slate-900 whitespace-pre-line': activeProject.theme === 'doodle'
+               }" x-text="activeProject.message"></p>
           </div>
-
-          <!-- Copy Share Button (Salin Link Murni) -->
-          <button @click="copyShareLink(activeProject)" 
-                  :class="{
-                    'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-lg shadow-pink-200 hover:from-pink-600 hover:to-rose-600': activeProject.theme === 'lovely',
-                    'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
-                    'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-base rounded-none border border-cyan-200': activeProject.theme === 'retro',
-                    'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
-                    'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
-                  }" 
-                  class="w-full py-3.5 text-xs font-semibold transition-all active:scale-95">
-            Salin Link Ucapan Ini
-          </button>
 
         </div>
+
       </div>
-
     </main>
-  </div>
 
+  </div>
 </body>
 </html>
