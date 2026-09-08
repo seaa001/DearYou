@@ -1,10 +1,5 @@
-// ==================== CONFIG SUPABASE ====================
-const SUPABASE_URL = 'https://ztmhdeownjvzgtzpdlwv.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_ZDReMFXmZPQxvKGQlu2NfQ_dWqpdrMt';
-
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-function dearyouApp() {
+// Memastikan fungsi terdaftar secara global di window
+window.dearyouApp = function dearyouApp() {
   return {
     viewMode: 'dashboard', 
     activeTab: 'my_projects', 
@@ -15,6 +10,7 @@ function dearyouApp() {
     copiedToast: false,
     toastMessage: '',
     isLoading: false,
+    supabaseClient: null,
 
     // Model Data Proyek Aktif
     activeProject: {
@@ -34,46 +30,71 @@ function dearyouApp() {
 
     projects: [],
 
-    async initApp() {
-      const { data: { user } } = await supabaseClient.auth.getUser();
-      this.currentUser = user;
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const slugParam = urlParams.get('slug');
-
-      if (slugParam) {
-        this.isLoading = true;
-        const { data, error } = await supabaseClient
-          .from('projects')
-          .select('*')
-          .eq('slug', slugParam)
-          .single();
-
-        if (data && !error) {
-          this.activeProject = {
-            id: data.id,
-            slug: data.slug,
-            type: data.type,
-            theme: data.theme || 'vintage_scrapbook',
-            title: data.title,
-            startDate: data.start_date,
-            audioUrl: data.audio_url,
-            photos: data.photos || [],
-            message: data.message,
-            status: data.status,
-            isPublic: data.is_public ?? false,
-            userId: data.user_id
-          };
-          this.viewMode = 'public';
-          setTimeout(() => this.triggerConfetti(), 800);
+    initSupabase() {
+      try {
+        if (window.supabase) {
+          const SUPABASE_URL = 'https://ztmhdeownjvzgtzpdlwv.supabase.co';
+          const SUPABASE_ANON_KEY = 'sb_publishable_ZDReMFXmZPQxvKGQlu2NfQ_dWqpdrMt';
+          this.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } else {
-          alert('Ucapan tidak ditemukan atau link salah!');
-          this.viewMode = 'dashboard';
+          console.warn('Supabase SDK tidak terdeteksi.');
+        }
+      } catch (e) {
+        console.error('Inisialisasi Supabase gagal:', e);
+      }
+    },
+
+    async initApp() {
+      this.initSupabase();
+
+      try {
+        if (this.supabaseClient) {
+          const { data } = await this.supabaseClient.auth.getUser();
+          if (data && data.user) {
+            this.currentUser = data.user;
+          }
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const slugParam = urlParams.get('slug');
+
+        if (slugParam && this.supabaseClient) {
+          this.isLoading = true;
+          const { data, error } = await this.supabaseClient
+            .from('projects')
+            .select('*')
+            .eq('slug', slugParam)
+            .single();
+
+          if (data && !error) {
+            this.activeProject = {
+              id: data.id,
+              slug: data.slug,
+              type: data.type,
+              theme: data.theme || 'vintage_scrapbook',
+              title: data.title,
+              startDate: data.start_date,
+              audioUrl: data.audio_url,
+              photos: data.photos || [],
+              message: data.message,
+              status: data.status,
+              isPublic: data.is_public ?? false,
+              userId: data.user_id
+            };
+            this.viewMode = 'public';
+            setTimeout(() => this.triggerConfetti(), 800);
+          } else {
+            alert('Ucapan tidak ditemukan atau link salah!');
+            this.viewMode = 'dashboard';
+            await this.fetchProjects();
+          }
+          this.isLoading = false;
+        } else {
           await this.fetchProjects();
         }
+      } catch (err) {
+        console.error('Error saat initApp:', err);
         this.isLoading = false;
-      } else {
-        await this.fetchProjects();
       }
     },
 
@@ -83,41 +104,47 @@ function dearyouApp() {
     },
 
     async fetchProjects() {
+      if (!this.supabaseClient) return;
+
       this.isLoading = true;
-      let query = supabaseClient
-        .from('projects')
-        .select('*')
-        .order('created_at', { ascending: false });
+      try {
+        let query = this.supabaseClient
+          .from('projects')
+          .select('*')
+          .order('created_at', { ascending: false });
 
-      if (this.activeTab === 'my_projects') {
-        if (this.currentUser) {
-          query = query.eq('user_id', this.currentUser.id);
-        } else {
-          this.projects = [];
-          this.isLoading = false;
-          return;
+        if (this.activeTab === 'my_projects') {
+          if (this.currentUser) {
+            query = query.eq('user_id', this.currentUser.id);
+          } else {
+            this.projects = [];
+            this.isLoading = false;
+            return;
+          }
+        } else if (this.activeTab === 'global') {
+          query = query.eq('is_public', true);
         }
-      } else if (this.activeTab === 'global') {
-        query = query.eq('is_public', true);
-      }
 
-      const { data, error } = await query;
+        const { data, error } = await query;
 
-      if (!error && data) {
-        this.projects = data.map(p => ({
-          id: p.id,
-          slug: p.slug,
-          type: p.type,
-          theme: p.theme || 'vintage_scrapbook',
-          title: p.title,
-          startDate: p.start_date,
-          audioUrl: p.audio_url,
-          photos: p.photos || [],
-          message: p.message,
-          status: p.status,
-          isPublic: p.is_public ?? false,
-          userId: p.user_id
-        }));
+        if (!error && data) {
+          this.projects = data.map(p => ({
+            id: p.id,
+            slug: p.slug,
+            type: p.type,
+            theme: p.theme || 'vintage_scrapbook',
+            title: p.title,
+            startDate: p.start_date,
+            audioUrl: p.audio_url,
+            photos: p.photos || [],
+            message: p.message,
+            status: p.status,
+            isPublic: p.is_public ?? false,
+            userId: p.user_id
+          }));
+        }
+      } catch (err) {
+        console.error('Gagal mengambil data proyek:', err);
       }
       this.isLoading = false;
     },
@@ -141,7 +168,7 @@ function dearyouApp() {
         message: '',
         status: 'draft',
         isPublic: false,
-        userId: this.currentUser?.id || null
+        userId: this.currentUser ? this.currentUser.id : null
       };
       this.viewMode = 'editor';
     },
@@ -152,6 +179,11 @@ function dearyouApp() {
     },
 
     async saveProject(status) {
+      if (!this.supabaseClient) {
+        alert('Database tidak terhubung. Coba muat ulang halaman.');
+        return;
+      }
+
       this.activeProject.status = status;
       this.isLoading = true;
 
@@ -167,10 +199,10 @@ function dearyouApp() {
         message: this.activeProject.message,
         status: status,
         is_public: this.activeProject.isPublic,
-        user_id: this.currentUser?.id || null
+        user_id: this.currentUser ? this.currentUser.id : null
       };
 
-      const { error } = await supabaseClient
+      const { error } = await this.supabaseClient
         .from('projects')
         .upsert(payload, { onConflict: 'id' });
 
@@ -185,9 +217,11 @@ function dearyouApp() {
     },
 
     async deleteProject(id) {
+      if (!this.supabaseClient) return;
+
       if (confirm('Apakah Anda yakin ingin menghapus ucapan ini?')) {
         this.isLoading = true;
-        const { error } = await supabaseClient
+        const { error } = await this.supabaseClient
           .from('projects')
           .delete()
           .eq('id', id);
@@ -328,4 +362,4 @@ function dearyouApp() {
       return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     }
   };
-}
+};

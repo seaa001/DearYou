@@ -2,13 +2,13 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>DearYou - Web Ucapan Digital Romantis</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Fredoka:wght@500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Fredoka:wght@500;700&family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,8 +28,9 @@
     }
   </script>
 
-  <!-- Custom Styles -->
+  <!-- Mencegah Flash / Unstyled Screen di Browser HP -->
   <style>
+    [x-cloak] { display: none !important; }
     .polaroid-shadow {
       box-shadow: 0 10px 25px -5px rgba(244, 63, 94, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
     }
@@ -42,15 +43,15 @@
     }
   </style>
 
-  <!-- External Libraries -->
+  <!-- Script Eksternal (Dimuat terurut untuk menghindari crash di mobile) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
-  <!-- Custom App Logic -->
+  
+  <!-- File app.js dipanggil sebelum Alpine.js -->
   <script src="app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-rose-50/50 text-slate-800 antialiased min-h-screen flex flex-col font-sans custom-scrollbar" x-data="dearyouApp()" x-init="initApp()">
+<body class="bg-rose-50/50 text-slate-800 antialiased min-h-screen flex flex-col font-sans custom-scrollbar" x-data="window.dearyouApp()" x-init="initApp()" x-cloak>
 
   <!-- NAVBAR HEADER -->
   <header x-show="viewMode !== 'public'" class="bg-white/80 backdrop-blur-md border-b border-rose-100 sticky top-0 z-40">
