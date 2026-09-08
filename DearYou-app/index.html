@@ -37,7 +37,7 @@
   <style>
     [x-cloak] { display: none !important; }
 
-    /* Moodboard Theme Pick Background */
+    /* Moodboard Pattern */
     .bg-moodboard-pattern {
       background-color: #f3efe6;
       background-image: radial-gradient(#d3c8b4 1.2px, transparent 1.2px);
@@ -69,10 +69,10 @@
       transform-origin: bottom center;
     }
 
-    /* Floating Animations for Event Elements */
+    /* Floating Animations */
     @keyframes floatUpSlow {
       0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-12px) rotate(3deg); }
+      50% { transform: translateY(-10px) rotate(2deg); }
       100% { transform: translateY(0px) rotate(0deg); }
     }
     .animate-float {
@@ -80,9 +80,9 @@
     }
 
     @keyframes floatUpBalloons {
-      0% { transform: translateY(20px) rotate(-3deg); }
-      50% { transform: translateY(-20px) rotate(4deg); }
-      100% { transform: translateY(20px) rotate(-3deg); }
+      0% { transform: translateY(12px) rotate(-3deg); }
+      50% { transform: translateY(-12px) rotate(4deg); }
+      100% { transform: translateY(12px) rotate(-3deg); }
     }
     .animate-balloon {
       animation: floatUpBalloons 4s ease-in-out infinite;
@@ -95,14 +95,14 @@
       filter: blur(100px);
       pointer-events: none;
       z-index: 0;
-      opacity: 0.45;
+      opacity: 0.4;
     }
 
     .animate-fade-in {
       animation: fadeIn 0.4s ease-out;
     }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(12px); }
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
@@ -112,12 +112,13 @@
     function dearyouApp() {
       return {
         viewMode: 'dashboard',
+        isRecipientView: false, // Flag untuk membedakan pembuat vs penerima link
         isAudioPlaying: false,
         activePhotoIndex: 0,
         copiedToast: false,
         toastMessage: '',
         timerInterval: null,
-        isCardOpened: false, // Untuk animasi pembuka kartu saat link dibuka
+        isCardOpened: false,
 
         counter: {
           years: 0, months: 0, days: 0,
@@ -156,7 +157,7 @@
           var urlParams = new URLSearchParams(window.location.search);
           var slugParam = urlParams.get('slug');
 
-          // JIKA DIBUKA VIA LINK SHARE
+          // JIKA DIBUKA VIA LINK SHARE (PENERIMA / SI B)
           if (slugParam) {
             var found = null;
             for (var i = 0; i < this.projects.length; i++) {
@@ -169,7 +170,8 @@
               this.activeProject = JSON.parse(JSON.stringify(found));
             }
             this.viewMode = 'public';
-            this.isCardOpened = false; // Tampilkan overlay interaktif pembuka
+            this.isRecipientView = true; // PENERIMA LINK: Tombol Dashboard Sembunyi
+            this.isCardOpened = false;
             this.startLiveCounter();
           }
         },
@@ -178,7 +180,6 @@
           this.isCardOpened = true;
           this.triggerConfetti();
           
-          // Opsi memutar musik otomatis jika dizinkan browser
           var audioEl = document.getElementById('bgAudio');
           if (audioEl) {
             var self = this;
@@ -258,15 +259,16 @@
           }
         },
 
+        // UNTUK PEMBUAT (SI A) INTIP PREVIEW KARTU
         openPreview: function(proj) {
           this.activeProject = JSON.parse(JSON.stringify(proj));
           this.viewMode = 'public';
-          this.isCardOpened = false; // Memulai dari animasi pembuka
+          this.isRecipientView = false; // PEMBUAT: Bisa kembali ke Dashboard
+          this.isCardOpened = false;
           this.activePhotoIndex = 0;
           this.startLiveCounter();
         },
 
-        // SALIN LINK (MURNI TANPA CONFETTI)
         copyShareLink: function(proj) {
           var target = proj || this.activeProject;
           var shareUrl = window.location.origin + window.location.pathname + '?slug=' + target.slug;
@@ -403,7 +405,7 @@
   <!-- APP ROOT -->
   <div x-data="dearyouApp()" x-init="initApp()" class="flex-1 flex flex-col min-h-screen relative z-10" x-cloak>
 
-    <!-- HEADER NAVIGATION -->
+    <!-- HEADER NAVIGATION (DASHBOARD & EDITOR ONLY) -->
     <header x-show="viewMode !== 'public'" class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
       <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2 cursor-pointer" @click="viewMode = 'dashboard'">
@@ -428,7 +430,7 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
 
-      <!-- ================= 1. DASHBOARD VIEW ================= -->
+      <!-- ================= 1. DASHBOARD VIEW (PEMBUAT/SI A) ================= -->
       <div x-show="viewMode === 'dashboard'" class="space-y-6 animate-fade-in">
 
         <!-- Hero Card -->
@@ -507,14 +509,13 @@
           </select>
         </div>
 
-        <!-- 2. PEMILIH TEMA MOODBOARD COLLAGE (MIX & RAME) -->
+        <!-- 2. PEMILIH TEMA MOODBOARD COLLAGE -->
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="text-xs font-bold text-slate-700">2. Pilih Tampilan Tema (Gaya Moodboard Collage)</label>
             <span class="text-[10px] text-slate-400">Klik salah satu swatch</span>
           </div>
 
-          <!-- MOODBOARD BOARD CONTAINER -->
           <div class="bg-moodboard-pattern p-4 md:p-6 rounded-2xl border border-stone-300 relative overflow-hidden shadow-inner">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
               
@@ -532,7 +533,6 @@
               <button @click="activeProject.theme = 'moodboard'" 
                       :class="activeProject.theme === 'moodboard' ? 'ring-4 ring-slate-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-white p-4 rounded-none border border-slate-300 text-left transition-all rotate-2 shadow-md relative">
-                <!-- Pin Decor -->
                 <div class="w-2.5 h-2.5 rounded-full bg-rose-500 absolute -top-1 left-3 shadow-sm"></div>
                 <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Theme 02</span>
                 <span class="block font-sans text-sm font-black text-slate-900 mt-1">Moodboard Pin</span>
@@ -558,13 +558,13 @@
                 <span class="block text-[9px] text-amber-900/80 mt-1 leading-tight">Kertas kraft tua, mesin ketik, & stempel pos.</span>
               </button>
 
-              <!-- SWATCH 5: JOURNAL DOODLE (TEMA TAMBAHAN) -->
+              <!-- SWATCH 5: JOURNAL DOODLE -->
               <button @click="activeProject.theme = 'doodle'" 
                       :class="activeProject.theme === 'doodle' ? 'ring-4 ring-purple-600 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-doodle-grid p-4 rounded-lg border-2 border-slate-800 text-left transition-all -rotate-2 shadow-md relative">
                 <span class="block text-[10px] font-hand font-bold text-purple-700">Theme 05</span>
                 <span class="block font-hand text-xl font-bold text-slate-900 leading-tight">Journal Doodle</span>
-                <span class="block text-[9px] text-slate-600 mt-1 leading-tight">Sketsa kertas kotak, font cakar ayam, & garis orat-aret.</span>
+                <span class="block text-[9px] text-slate-600 mt-1 leading-tight">Sketsa kertas kotak, font cakar ayam, & orat-aret.</span>
               </button>
 
             </div>
@@ -614,7 +614,7 @@
         </div>
       </div>
 
-      <!-- ================= 3. PUBLIC VIEW & ANIMATED OPENING OVERLAY ================= -->
+      <!-- ================= 3. PUBLIC VIEW & ANIMATED OPENING SCREEN ================= -->
       <div x-show="viewMode === 'public'" 
            :class="{
              'bg-gradient-to-br from-pink-100 via-rose-50 to-pink-200 text-slate-800': activeProject.theme === 'lovely',
@@ -623,12 +623,13 @@
              'bg-[#f0e7d5] text-stone-900': activeProject.theme === 'vintage',
              'bg-doodle-grid text-slate-900': activeProject.theme === 'doodle'
            }" 
-           class="min-h-[90vh] flex flex-col items-center justify-center p-3 md:p-6 relative transition-all duration-500 animate-fade-in rounded-3xl">
+           class="min-h-[92vh] flex flex-col items-center justify-center p-3 md:p-6 relative transition-all duration-500 animate-fade-in rounded-3xl">
         
         <audio id="bgAudio" :src="activeProject.audioUrl" loop></audio>
 
         <!-- Top Navigation Bar -->
-        <div class="fixed top-4 left-4 z-40">
+        <!-- LOGIK NYATU: Hanya tampil jika SI A (PEMBUAT) yang sedang preview. HILANG jika SI B (PENERIMA) buka link! -->
+        <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40">
           <button @click="viewMode = 'dashboard'" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all">
             Dashboard
           </button>
@@ -641,96 +642,183 @@
           </button>
         </div>
 
-        <!-- ================= OVERLAY ANIMASI PEMBUKA KARTU (PAS BUKA LINK) ================= -->
-        <div x-show="!isCardOpened" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-lg flex flex-col items-center justify-center p-4 text-white text-center">
+        <!-- ================= PEMBUKA KARTU (MENYATU SESUAI TEMA & MOMEN) ================= -->
+        <div x-show="!isCardOpened" class="w-full max-w-md my-auto animate-fade-in">
           
-          <!-- 1. ANIMASI KHUSUS ANNIVERSARY (COKLAT + LOVE + KARTU) -->
-          <template x-if="activeProject.type === 'anniversary'">
-            <div class="space-y-6 max-w-sm mx-auto animate-fade-in flex flex-col items-center">
-              <!-- Ilustrasi Vector Cokelat & Love -->
-              <div class="relative w-32 h-32 flex items-center justify-center animate-float">
-                <!-- Floating Love SVGs -->
-                <svg class="w-8 h-8 text-rose-500 absolute -top-2 -left-2 animate-ping" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                <svg class="w-10 h-10 text-pink-400 absolute -bottom-1 -right-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <!-- CONTAINER PEMBUKA KARTU (DESAIN DISESUAIKAN DENGAN TEMA AKTIF) -->
+          <div :class="{
+                 'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-8 text-center': activeProject.theme === 'lovely',
+                 'bg-white border-2 border-slate-800 shadow-xl rounded-none p-8 text-center relative': activeProject.theme === 'moodboard',
+                 'bg-slate-900 border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] rounded-none p-8 text-center': activeProject.theme === 'retro',
+                 'bg-[#fdfaf3] border border-amber-900/40 shadow-2xl rounded-none p-8 text-center relative': activeProject.theme === 'vintage',
+                 'bg-white border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-8 text-center': activeProject.theme === 'doodle'
+               }">
+
+            <!-- Retro Header Title Bar -->
+            <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-4 -mx-4 mb-6">
+              <span>SPECIAL_PRESENT.EXE</span>
+              <span>[X]</span>
+            </div>
+
+            <!-- Tape Decor for Moodboard/Vintage/Doodle -->
+            <div x-show="activeProject.theme === 'moodboard'" class="washi-tape absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5"></div>
+            <div x-show="activeProject.theme === 'vintage'" class="w-8 h-8 border-2 border-dashed border-amber-800/40 absolute top-3 right-3 text-[9px] flex items-center justify-center font-mono">GIFT</div>
+
+            <!-- MOMEN 1: ANNIVERSARY (COKLAT + LOVE + KARTU) -->
+            <template x-if="activeProject.type === 'anniversary'">
+              <div class="space-y-6 flex flex-col items-center">
                 
-                <!-- Chocolate Box Vector -->
-                <svg class="w-24 h-24 text-amber-700 drop-shadow-2xl" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-4 8c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2H8v-2z"/>
-                </svg>
+                <div class="relative w-28 h-28 flex items-center justify-center animate-float">
+                  <!-- Floating Heart Vectors -->
+                  <svg class="w-8 h-8 text-rose-500 absolute -top-2 -left-2 animate-ping" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <svg class="w-10 h-10 text-pink-400 absolute -bottom-1 -right-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                  <!-- Chocolate Box Vector -->
+                  <svg class="w-24 h-24 text-amber-800 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-4 8c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2H8v-2z"/>
+                  </svg>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span :class="{
+                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
+                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase tracking-widest block">Special Anniversary Gift</span>
+                  
+                  <h3 :class="{
+                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
+                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Ada Kotak Cokelat & Pesan Untukmu</h3>
+                  
+                  <p class="text-xs opacity-70">Sentuh tombol di bawah untuk membuka ucapan.</p>
+                </div>
+
+                <!-- Action Button Per Theme -->
+                <button @click="openCardInteractive()" 
+                        :class="{
+                          'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-lg shadow-pink-200 hover:from-pink-600 hover:to-rose-600': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
+                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
+                        }" 
+                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                  Buka Cokelat & Kartu
+                </button>
+
               </div>
+            </template>
 
-              <div class="space-y-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-rose-400 bg-rose-950/60 px-3 py-1 rounded-full border border-rose-800">Special Anniversary Gift</span>
-                <h3 class="text-xl font-serif font-bold text-white">Ada Pesan & Cokelat Spesial Untukmu</h3>
-                <p class="text-xs text-slate-300">Sentuh tombol di bawah untuk membuka kartu ucapan.</p>
+            <!-- MOMEN 2: ULANG TAHUN (KUE + BALON + KARTU) -->
+            <template x-if="activeProject.type === 'birthday'">
+              <div class="space-y-6 flex flex-col items-center">
+                
+                <div class="relative w-28 h-28 flex items-center justify-center">
+                  <svg class="w-8 h-10 text-amber-500 absolute -top-3 -left-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                  <svg class="w-8 h-10 text-purple-500 absolute -top-2 -right-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+
+                  <!-- Candle Flame -->
+                  <div class="w-3 h-5 bg-amber-400 rounded-full absolute -top-1 animate-flame z-20"></div>
+
+                  <!-- Cake Vector -->
+                  <svg class="w-24 h-24 text-rose-500 drop-shadow-xl z-10" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 6a1 1 0 0 1 1 1v1h-2V7a1 1 0 0 1 1-1zm9 7v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 2H5v5h14v-5z"/>
+                  </svg>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span :class="{
+                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
+                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase tracking-widest block">Happy Birthday Surprise</span>
+                  
+                  <h3 :class="{
+                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
+                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Selamat Ulang Tahun!</h3>
+                  
+                  <p class="text-xs opacity-70">Tiup lilinnya & buka kartu di dalamnya.</p>
+                </div>
+
+                <button @click="openCardInteractive()" 
+                        :class="{
+                          'bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-xl shadow-lg hover:from-amber-600 hover:to-rose-600': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
+                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
+                        }" 
+                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                  Tiup Lilin & Buka Kartu
+                </button>
+
               </div>
+            </template>
 
-              <button @click="openCardInteractive()" class="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-bold px-8 py-3.5 rounded-2xl shadow-xl text-xs tracking-wider uppercase transition-all active:scale-95">
-                Buka Kartu Anniversary
-              </button>
-            </div>
-          </template>
+            <!-- MOMEN 3: VALENTINE (BALON + LOVE + KARTU) -->
+            <template x-if="activeProject.type === 'valentine'">
+              <div class="space-y-6 flex flex-col items-center">
+                
+                <div class="relative w-28 h-28 flex items-center justify-center animate-balloon">
+                  <svg class="w-20 h-24 text-rose-500 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <svg class="w-12 h-14 text-pink-400 absolute top-0 -right-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </div>
 
-          <!-- 2. ANIMASI KHUSUS ULANG TAHUN (KUE + BALON + KARTU) -->
-          <template x-if="activeProject.type === 'birthday'">
-            <div class="space-y-6 max-w-sm mx-auto animate-fade-in flex flex-col items-center">
-              
-              <!-- Kue Ulang Tahun Vector + Api Lilin Menyala -->
-              <div class="relative w-32 h-32 flex items-center justify-center">
-                <!-- Floating Balloons -->
-                <svg class="w-8 h-10 text-amber-400 absolute -top-4 -left-4 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                <svg class="w-8 h-10 text-purple-400 absolute -top-2 -right-4 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                <div class="space-y-1.5">
+                  <span :class="{
+                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
+                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase tracking-widest block">Happy Valentine's Day</span>
+                  
+                  <h3 :class="{
+                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
+                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Ada Surat Cinta Spesial</h3>
+                  
+                  <p class="text-xs opacity-70">Sentuh untuk membuka kartu ucapan Valentine.</p>
+                </div>
 
-                <!-- Candle Flame -->
-                <div class="w-3 h-5 bg-amber-400 rounded-full absolute -top-1 animate-flame z-20"></div>
+                <button @click="openCardInteractive()" 
+                        :class="{
+                          'bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-xl shadow-lg hover:from-pink-600 hover:to-rose-700': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
+                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
+                        }" 
+                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                  Buka Kartu Valentine
+                </button>
 
-                <!-- Cake Vector -->
-                <svg class="w-24 h-24 text-rose-400 drop-shadow-2xl z-10" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 6a1 1 0 0 1 1 1v1h-2V7a1 1 0 0 1 1-1zm9 7v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 2H5v5h14v-5z"/>
-                </svg>
               </div>
+            </template>
 
-              <div class="space-y-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-amber-300 bg-amber-950/60 px-3 py-1 rounded-full border border-amber-800">Happy Birthday Surprise</span>
-                <h3 class="text-xl font-serif font-bold text-white">Selamat Ulang Tahun!</h3>
-                <p class="text-xs text-slate-300">Tiup lilinnya & buka kartu ucapan di dalamnya.</p>
-              </div>
-
-              <button @click="openCardInteractive()" class="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-bold px-8 py-3.5 rounded-2xl shadow-xl text-xs tracking-wider uppercase transition-all active:scale-95">
-                Buka Kartu Ulang Tahun
-              </button>
-            </div>
-          </template>
-
-          <!-- 3. ANIMASI KHUSUS VALENTINE (BALON + LOVE + KARTU) -->
-          <template x-if="activeProject.type === 'valentine'">
-            <div class="space-y-6 max-w-sm mx-auto animate-fade-in flex flex-col items-center">
-              
-              <!-- Floating Heart Balloons -->
-              <div class="relative w-32 h-32 flex items-center justify-center animate-balloon">
-                <svg class="w-20 h-24 text-rose-500 drop-shadow-2xl" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-                <svg class="w-12 h-14 text-pink-400 absolute top-0 -right-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                </svg>
-              </div>
-
-              <div class="space-y-2">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-pink-300 bg-pink-950/60 px-3 py-1 rounded-full border border-pink-800">Happy Valentine's Day</span>
-                <h3 class="text-xl font-serif font-bold text-white">Ada Surat Cinta Untukmu</h3>
-                <p class="text-xs text-slate-300">Sentuh untuk membongkar kartu ucapan Valentine.</p>
-              </div>
-
-              <button @click="openCardInteractive()" class="bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold px-8 py-3.5 rounded-2xl shadow-xl text-xs tracking-wider uppercase transition-all active:scale-95">
-                Buka Kartu Valentine
-              </button>
-            </div>
-          </template>
-
+          </div>
         </div>
 
-        <!-- ================= MAIN TRANSFORMING THEME CARD ================= -->
+        <!-- ================= KARTU UTAMA DIBUKA (ISI LENGKAP) ================= -->
         <div x-show="isCardOpened" 
              :class="{
                'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-6 md:p-8': activeProject.theme === 'lovely',
@@ -741,7 +829,7 @@
              }" 
              class="max-w-md w-full my-8 space-y-6 text-center transition-all duration-300">
 
-          <!-- Retro Window Title Bar -->
+          <!-- Retro Window Bar -->
           <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-2 -mx-2 mb-4">
             <span>DEARYOU_CARD.EXE</span>
             <span>[X]</span>
@@ -877,7 +965,7 @@
             </p>
           </div>
 
-          <!-- Polaroid Photo Frame per Theme -->
+          <!-- Polaroid Photo Frame -->
           <div class="relative py-1">
             <div :class="{
                    'bg-white p-3 rounded-2xl shadow-lg border border-pink-100': activeProject.theme === 'lovely',
@@ -908,7 +996,7 @@
             </template>
           </div>
 
-          <!-- Message Container per Theme -->
+          <!-- Message Container -->
           <div :class="{
                  'bg-white/90 border border-pink-100 text-slate-700 rounded-2xl p-5 shadow-sm': activeProject.theme === 'lovely',
                  'bg-slate-50 border border-slate-200 text-slate-800 rounded-none p-5': activeProject.theme === 'moodboard',
@@ -928,7 +1016,7 @@
                 x-text="activeProject.message"></p>
           </div>
 
-          <!-- Copy Share Button (Murni Tanpa Confetti) -->
+          <!-- Copy Share Button (Salin Link Murni) -->
           <button @click="copyShareLink(activeProject)" 
                   :class="{
                     'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-lg shadow-pink-200 hover:from-pink-600 hover:to-rose-600': activeProject.theme === 'lovely',
