@@ -1,4 +1,3 @@
-// Memastikan fungsi terdaftar secara global di window
 window.dearyouApp = function dearyouApp() {
   return {
     viewMode: 'dashboard', 
@@ -12,16 +11,15 @@ window.dearyouApp = function dearyouApp() {
     isLoading: false,
     supabaseClient: null,
 
-    // Model Data Proyek Aktif
     activeProject: {
       id: null,
       slug: '',
       type: 'anniversary',
-      theme: 'vintage_scrapbook', // 'vintage_scrapbook', 'dark', 'pastel', 'kartun'
+      theme: 'vintage_scrapbook',
       title: '',
       startDate: new Date().toISOString().split('T')[0],
       audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
-      photos: [],
+      photos: ['https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'],
       message: '',
       status: 'draft',
       isPublic: false,
@@ -32,12 +30,12 @@ window.dearyouApp = function dearyouApp() {
 
     initSupabase() {
       try {
-        if (window.supabase) {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
           const SUPABASE_URL = 'https://ztmhdeownjvzgtzpdlwv.supabase.co';
           const SUPABASE_ANON_KEY = 'sb_publishable_ZDReMFXmZPQxvKGQlu2NfQ_dWqpdrMt';
           this.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } else {
-          console.warn('Supabase SDK tidak terdeteksi.');
+          console.warn('Supabase SDK tidak dimuat.');
         }
       } catch (e) {
         console.error('Inisialisasi Supabase gagal:', e);
@@ -75,7 +73,7 @@ window.dearyouApp = function dearyouApp() {
               title: data.title,
               startDate: data.start_date,
               audioUrl: data.audio_url,
-              photos: data.photos || [],
+              photos: (data.photos && data.photos.length) ? data.photos : ['https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'],
               message: data.message,
               status: data.status,
               isPublic: data.is_public ?? false,
@@ -84,7 +82,7 @@ window.dearyouApp = function dearyouApp() {
             this.viewMode = 'public';
             setTimeout(() => this.triggerConfetti(), 800);
           } else {
-            alert('Ucapan tidak ditemukan atau link salah!');
+            alert('Ucapan tidak ditemukan!');
             this.viewMode = 'dashboard';
             await this.fetchProjects();
           }
@@ -104,7 +102,10 @@ window.dearyouApp = function dearyouApp() {
     },
 
     async fetchProjects() {
-      if (!this.supabaseClient) return;
+      if (!this.supabaseClient) {
+        this.projects = [];
+        return;
+      }
 
       this.isLoading = true;
       try {
@@ -180,7 +181,7 @@ window.dearyouApp = function dearyouApp() {
 
     async saveProject(status) {
       if (!this.supabaseClient) {
-        alert('Database tidak terhubung. Coba muat ulang halaman.');
+        alert('Database belum terhubung.');
         return;
       }
 
@@ -207,7 +208,7 @@ window.dearyouApp = function dearyouApp() {
         .upsert(payload, { onConflict: 'id' });
 
       if (error) {
-        alert('Gagal menyimpan ke database: ' + error.message);
+        alert('Gagal menyimpan: ' + error.message);
       } else {
         this.showToast('Ucapan berhasil disimpan! ☁️');
         await this.fetchProjects();
@@ -277,6 +278,7 @@ window.dearyouApp = function dearyouApp() {
     },
 
     addPhoto() {
+      if (!this.activeProject.photos) this.activeProject.photos = [];
       this.activeProject.photos.push('https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800');
     },
 
@@ -299,7 +301,7 @@ window.dearyouApp = function dearyouApp() {
         audioEl.play().then(() => {
           this.isAudioPlaying = true;
         }).catch(() => {
-          alert('Audio gagal diputar. Periksa URL MP3 Anda.');
+          alert('Audio gagal diputar.');
         });
       }
     },
