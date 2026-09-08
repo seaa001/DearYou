@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DearYou.id - Special Moments Digital Greetings</title>
+  
+  <!-- Supabase JS Client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts untuk 4 Varian Tema -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;600;700&family=VT323&display=swap" rel="stylesheet">
+  
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- External Files -->
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/app.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-sans bg-stone-100 text-stone-800 antialiased selection:bg-rose-200 selection:text-rose-900" x-data="dearyouApp()" x-init="initApp()">
+
+  <!-- Toast Notification -->
+  <div x-show="copiedToast" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200 transform" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 translate-y-4" class="fixed bottom-5 right-5 z-50 bg-stone-900 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3 border border-stone-700" x-cloak>
+    <i class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+    <span class="text-xs sm:text-sm font-semibold" x-text="toastMessage"></span>
+  </div>
+
+  <!-- ==================== MODE HASIL JADI (PUBLIK / PREVIEW SI B) ==================== -->
+  <template x-if="viewMode === 'public'">
+    <div class="min-h-screen relative flex flex-col items-center justify-center p-3 sm:p-6 overflow-x-hidden">
+      
+      <!-- Audio Backsound Background -->
+      <audio id="bgAudio" loop :src="activeProject.audioUrl"></audio>
+
+      <!-- FLOATING BUTTON: TOMBOL KEMBALI (KIRI ATAS) -->
+      <div class="fixed top-4 left-4 z-50">
+        <button @click="goBackFromPreview()" class="px-4 py-2.5 rounded-full bg-stone-900/90 text-white shadow-xl border border-stone-700 backdrop-blur-md flex items-center space-x-2 text-xs font-bold hover:bg-stone-800 hover:scale-105 transition-all">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Kembali</span>
+        </button>
+      </div>
+
+      <!-- Music Floating Widget (KANAN ATAS) -->
+      <div class="fixed top-4 right-4 z-50">
+        <button @click="toggleAudio()" class="px-3.5 py-2 rounded-full bg-white/90 text-rose-600 shadow-xl border-2 border-rose-300 backdrop-blur-md flex items-center space-x-2 text-xs font-bold hover:scale-105 transition-all">
+          <i class="fa-solid text-sm" :class="isAudioPlaying ? 'fa-compact-disc fa-spin text-rose-600' : 'fa-music'"></i>
+          <span x-text="isAudioPlaying ? 'Lagu Diputar' : 'Putar Musik 🎵'"></span>
+        </button>
+      </div>
+
+      <!-- ================= TEMA 1: VINTAGE SCRAPBOOK ================= -->
+      <template x-if="activeProject.theme === 'vintage_scrapbook'">
+        <div class="w-full max-w-lg mx-auto bg-paper-kraft p-4 sm:p-6 rounded-3xl border-2 border-stone-300 shadow-2xl relative my-auto space-y-4">
+          <div class="washi-tape-yellow absolute -top-3 left-1/2 -translate-x-1/2 w-32 h-7 border-t border-b border-amber-300 rotate-[-1deg] z-20"></div>
+
+          <div class="flex justify-between items-start pt-2">
+            <div class="border-2 border-dashed border-rose-500 bg-rose-50 px-3 py-1 rounded rotate-[-3deg] shadow-sm">
+              <span class="text-[11px] font-typewriter font-bold text-rose-600 uppercase" x-text="getBadgeText(activeProject.type)"></span>
+            </div>
+            <div class="text-[10px] font-typewriter font-bold text-stone-500 bg-stone-100 px-2.5 py-1 rounded-full border border-stone-300">
+              <i class="fa-solid fa-stamp text-rose-500 mr-1"></i>
+              <span x-text="formatDate(activeProject.startDate)"></span>
+            </div>
+          </div>
+
+          <div class="text-center my-2">
+            <h1 class="text-3xl sm:text-4xl font-serif font-bold text-stone-800 leading-snug" x-text="activeProject.title || 'Momen Spesial'"></h1>
+            <p class="font-handwriting text-2xl text-rose-600">"Every picture tells our story..."</p>
+          </div>
+
+          <!-- Photo Polaroid Scrapbook -->
+          <div class="bg-white p-3 pb-7 rounded-sm shadow-xl border border-stone-200 rotate-[-2deg] relative my-4">
+            <div class="washi-tape-pink absolute -top-3 left-6 w-16 h-5 rotate-[-10deg] z-10"></div>
+            <div class="w-full h-64 sm:h-72 overflow-hidden bg-stone-100 relative">
+              <img :src="activeProject.photos[activePhotoIndex] || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'" class="w-full h-full object-cover">
+            </div>
+            <div class="mt-3 text-center">
+              <span class="font-handwriting text-2xl text-stone-700" x-text="`Sweet Memory #${activePhotoIndex + 1} ❤️`"></span>
+            </div>
+            <template x-if="activeProject.photos.length > 1">
+              <div class="absolute bottom-2 left-0 right-0 flex justify-center space-x-1.5 z-20">
+                <template x-for="(photo, index) in activeProject.photos" :key="index">
+                  <button @click="activePhotoIndex = index" class="w-2.5 h-2.5 rounded-full transition-all" :class="activePhotoIndex === index ? 'bg-rose-500 w-5' : 'bg-stone-300'"></button>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <!-- Counter Ticket Vintage -->
+          <div class="bg-[#fefcf3] border-2 border-dashed border-stone-300 p-4 rounded-2xl font-typewriter">
+            <p class="text-[10px] font-bold uppercase tracking-wider text-rose-600 mb-2" x-text="getCounterTitle(activeProject.type)"></p>
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div class="bg-white p-2 rounded-xl border border-stone-200">
+                <span class="block text-2xl font-serif font-bold text-rose-600" x-text="calculateDays(activeProject.startDate).years">0</span>
+                <span class="text-[9px] uppercase text-stone-500">Tahun</span>
+              </div>
+              <div class="bg-white p-2 rounded-xl border border-stone-200">
+                <span class="block text-2xl font-serif font-bold text-rose-600" x-text="calculateDays(activeProject.startDate).months">0</span>
+                <span class="text-[9px] uppercase text-stone-500">Bulan</span>
+              </div>
+              <div class="bg-white p-2 rounded-xl border border-stone-200">
+                <span class="block text-2xl font-serif font-bold text-rose-600" x-text="calculateDays(activeProject.startDate).days">0</span>
+                <span class="text-[9px] uppercase text-stone-500">Hari</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Surat Cinta Bergaris -->
+          <div class="lined-paper border border-stone-300 rounded-2xl p-5 shadow-sm relative">
+            <i class="fa-solid fa-paperclip absolute top-2 left-3 text-stone-400 rotate-[-45deg] text-lg"></i>
+            <h3 class="font-handwriting text-2xl font-bold text-rose-600 mb-1 pl-4">Surat Spesial</h3>
+            <p class="font-handwriting text-2xl text-stone-800 whitespace-pre-line leading-relaxed pl-4" x-text="activeProject.message"></p>
+          </div>
+
+          <p class="text-center font-typewriter text-[11px] text-stone-500 pt-2">Dibuat via <span class="font-bold text-rose-600">DearYou.id</span> 💌</p>
+        </div>
+      </template>
+
+      <!-- ================= TEMA 2: RETRO 90S Y2K POP ================= -->
+      <template x-if="activeProject.theme === 'retro_90s'">
+        <div class="w-full max-w-lg mx-auto bg-retro-dots p-4 sm:p-6 rounded-3xl border-4 border-purple-900 shadow-2xl relative my-auto space-y-4">
+          <div class="bg-white border-2 border-stone-900 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rounded-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-purple-600 to-pink-500 p-2 flex justify-between items-center text-white border-b-2 border-stone-900">
+              <span class="font-retro text-xl tracking-widest uppercase flex items-center">
+                <i class="fa-solid fa-compact-disc mr-2"></i> DEARYOU_PLAYER.EXE
+              </span>
+              <div class="flex space-x-1">
+                <div class="w-4 h-4 bg-yellow-400 border border-black rounded-sm"></div>
+                <div class="w-4 h-4 bg-green-400 border border-black rounded-sm"></div>
+                <div class="w-4 h-4 bg-red-500 border border-black rounded-sm"></div>
+              </div>
+            </div>
+
+            <div class="p-4 text-center">
+              <span class="inline-block px-3 py-1 bg-yellow-300 border-2 border-stone-900 font-retro text-lg text-stone-900 font-bold rotate-[-2deg] mb-2" x-text="getBadgeText(activeProject.type)"></span>
+              <h1 class="text-3xl font-black text-stone-900 tracking-tight" x-text="activeProject.title || 'Momen Spesial'"></h1>
+              <p class="font-retro text-xl text-purple-700" x-text="formatDate(activeProject.startDate)"></p>
+            </div>
+          </div>
+
+          <div class="bg-yellow-300 border-2 border-stone-900 p-3 rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] rotate-[1deg]">
+            <div class="w-full h-64 sm:h-72 bg-purple-100 border-2 border-stone-900 rounded-xl overflow-hidden relative">
+              <img :src="activeProject.photos[activePhotoIndex] || 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?auto=format&fit=crop&q=80&w=800'" class="w-full h-full object-cover">
+            </div>
+            <div class="mt-2 text-center flex justify-between items-center px-2">
+              <span class="font-retro text-2xl text-stone-900">TRACK_01.JPG</span>
+              <span class="text-xs bg-white border border-stone-900 px-2 py-0.5 font-bold">Y2K POP ★</span>
+            </div>
+          </div>
+
+          <div class="bg-pink-300 border-2 border-stone-900 p-4 rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-stone-900 font-retro">
+            <p class="text-lg font-bold text-center uppercase tracking-wider mb-2" x-text="getCounterTitle(activeProject.type)"></p>
+            <div class="grid grid-cols-3 gap-2 text-center text-xl">
+              <div class="bg-white border-2 border-stone-900 p-2 rounded-lg">
+                <span class="block text-3xl font-bold text-purple-700" x-text="calculateDays(activeProject.startDate).years">0</span>
+                <span>YEARS</span>
+              </div>
+              <div class="bg-white border-2 border-stone-900 p-2 rounded-lg">
+                <span class="block text-3xl font-bold text-purple-700" x-text="calculateDays(activeProject.startDate).months">0</span>
+                <span>MONTHS</span>
+              </div>
+              <div class="bg-white border-2 border-stone-900 p-2 rounded-lg">
+                <span class="block text-3xl font-bold text-purple-700" x-text="calculateDays(activeProject.startDate).days">0</span>
+                <span>DAYS</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white border-2 border-stone-900 p-4 rounded-xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <h3 class="font-retro text-2xl font-bold text-purple-800 mb-2">💌 MESSAGE_LOG.TXT</h3>
+            <p class="font-mono text-sm text-stone-800 whitespace-pre-line leading-relaxed" x-text="activeProject.message"></p>
+          </div>
+
+          <p class="text-center font-retro text-xl text-stone-600 pt-2">Powered by <span class="font-bold text-purple-700">DearYou.id</span> 👾</p>
+        </div>
+      </template>
+
+      <!-- ================= TEMA 3: LOVE OVERLOAD ================= -->
+      <template x-if="activeProject.theme === 'love_overload'">
+        <div class="w-full max-w-lg mx-auto bg-love-silk p-5 sm:p-7 rounded-[40px] border-4 border-rose-300 shadow-2xl relative my-auto space-y-5 animate-glow">
+          <div class="absolute -top-4 -right-2 text-4xl animate-bounce">💖</div>
+          <div class="absolute -bottom-3 -left-3 text-4xl">🌹</div>
+
+          <div class="text-center pt-2">
+            <span class="inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-rose-600 text-white shadow-md mb-2" x-text="getBadgeText(activeProject.type)"></span>
+            <h1 class="text-3xl sm:text-4xl font-serif font-bold text-rose-900" x-text="activeProject.title || 'Momen Spesial'"></h1>
+            <p class="font-handwriting text-2xl text-rose-700 mt-1">"You hold the key to my heart forever"</p>
+          </div>
+
+          <div class="relative flex justify-center my-4">
+            <div class="w-64 h-64 sm:w-72 sm:h-72 rounded-full p-3 bg-gradient-to-tr from-rose-500 via-pink-400 to-red-500 shadow-xl border-4 border-white animate-float">
+              <div class="w-full h-full rounded-full overflow-hidden border-2 border-white">
+                <img :src="activeProject.photos[activePhotoIndex] || 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&q=80&w=800'" class="w-full h-full object-cover">
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-rose-200 text-center">
+            <p class="text-xs font-bold uppercase tracking-wider text-rose-600 mb-3" x-text="getCounterTitle(activeProject.type)"></p>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-rose-50 p-2.5 rounded-2xl border border-rose-200">
+                <span class="block text-2xl font-serif font-bold text-rose-600" x-text="calculateDays(activeProject.startDate).years">0</span>
+                <span class="text-[10px] uppercase font-bold text-rose-400">Tahun</span>
+              </div>
+              <div class="bg-rose-50 p-2.5 rounded-2xl border border-rose-200">
+                <span class="block text-2xl font-serif font-bold text-rose-600" x-text="calculateDays(activeProject.startDate).months">0</span>
+                <span class="text-[10px] uppercase font-bold text-rose-400">Bulan</span>
+              </div>
+              <div class="bg-rose-50 p-2.5 rounded-2xl border border-rose-200">
+                <span class="block text-2xl font-serif font-bold text-rose-600" x-text="calculateDays(activeProject.startDate).days">0</span>
+                <span class="text-[10px] uppercase font-bold text-rose-400">Hari</span>
+              </div>
+            </div>
+            <p class="font-handwriting text-2xl text-rose-600 mt-3" x-text="`Total: ${calculateDays(activeProject.startDate).totalDays} hari penuh cinta tanpa batas ✨`"></p>
+          </div>
+
+          <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-lg border border-rose-200 relative">
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-serif font-bold text-xl text-rose-900">Letter for My Love</h3>
+              <div class="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs shadow-md">❤️</div>
+            </div>
+            <p class="font-sans text-sm text-rose-950 whitespace-pre-line leading-relaxed" x-text="activeProject.message"></p>
+          </div>
+
+          <p class="text-center text-xs text-rose-800 font-medium pt-1">Made with endless love via <span class="font-bold">DearYou.id</span> 💖</p>
+        </div>
+      </template>
+
+      <!-- ================= TEMA 4: COZY CHOCOLATE ================= -->
+      <template x-if="activeProject.theme === 'cozy_chocolate'">
+        <div class="w-full max-w-lg mx-auto bg-choco-board p-5 sm:p-7 rounded-3xl border-2 border-amber-900/50 shadow-2xl relative my-auto space-y-4 text-[#f5e6d8]">
+          <div class="text-center pt-2">
+            <span class="inline-block px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-amber-900 text-amber-200 border border-amber-700/50 mb-2" x-text="getBadgeText(activeProject.type)"></span>
+            <h1 class="text-3xl sm:text-4xl font-serif font-bold text-amber-100" x-text="activeProject.title || 'Momen Spesial'"></h1>
+            <p class="text-xs text-amber-300/80 font-typewriter mt-1" x-text="formatDate(activeProject.startDate)"></p>
+          </div>
+
+          <div class="bg-[#170e0b] p-3 rounded-2xl border border-amber-900/60 shadow-xl">
+            <div class="w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-amber-800/40">
+              <img :src="activeProject.photos[activePhotoIndex] || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'" class="w-full h-full object-cover">
+            </div>
+          </div>
+
+          <div class="bg-[#2e1d17] p-4 rounded-2xl border border-amber-900/40 text-center font-typewriter">
+            <p class="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2" x-text="getCounterTitle(activeProject.type)"></p>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-[#1f130f] p-2 rounded-xl border border-amber-900/40">
+                <span class="block text-2xl font-serif font-bold text-amber-200" x-text="calculateDays(activeProject.startDate).years">0</span>
+                <span class="text-[9px] text-amber-400/80">Tahun</span>
+              </div>
+              <div class="bg-[#1f130f] p-2 rounded-xl border border-amber-900/40">
+                <span class="block text-2xl font-serif font-bold text-amber-200" x-text="calculateDays(activeProject.startDate).months">0</span>
+                <span class="text-[9px] text-amber-400/80">Bulan</span>
+              </div>
+              <div class="bg-[#1f130f] p-2 rounded-xl border border-amber-900/40">
+                <span class="block text-2xl font-serif font-bold text-amber-200" x-text="calculateDays(activeProject.startDate).days">0</span>
+                <span class="text-[9px] text-amber-400/80">Hari</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-[#f9f3eb] text-stone-900 p-5 rounded-2xl shadow-md border border-amber-200">
+            <h3 class="font-serif font-bold text-lg text-amber-950 mb-2">Pesan Hangat</h3>
+            <p class="font-sans text-sm text-stone-800 whitespace-pre-line leading-relaxed" x-text="activeProject.message"></p>
+          </div>
+
+          <p class="text-center text-[11px] font-typewriter text-amber-400/70 pt-1">Created with warmth via <span class="text-amber-300 font-bold">DearYou.id</span> ☕</p>
+        </div>
+      </template>
+
+    </div>
+  </template>
+
+
+  <!-- ==================== DASHBOARD & EDITOR (SI A) ==================== -->
+  <template x-if="viewMode !== 'public'">
+    <div class="min-h-screen bg-stone-50 flex flex-col">
+      
+      <!-- Top Navbar -->
+      <nav class="bg-white border-b border-stone-200 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16 items-center">
+            <div class="flex items-center space-x-3 cursor-pointer" @click="viewMode = 'dashboard'">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-rose-500 to-pink-600 flex items-center justify-center text-white shadow-md">
+                <i class="fa-solid fa-heart-circle-bolt text-xl"></i>
+              </div>
+              <span class="font-serif font-bold text-2xl tracking-tight text-stone-900">DearYou<span class="text-rose-600">.id</span></span>
+            </div>
+
+            <div class="flex items-center space-x-3">
+              <button @click="showOnboarding = true" class="px-3 py-1.5 text-xs sm:text-sm font-medium text-stone-600 hover:text-rose-600 bg-stone-100 hover:bg-rose-50 rounded-lg transition-colors flex items-center space-x-1.5">
+                <i class="fa-regular fa-circle-question"></i>
+                <span>Panduan</span>
+              </button>
+              <button @click="createNewProject('anniversary')" class="px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm transition-all flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">Buat Ucapan Baru</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Dashboard View -->
+      <main x-show="viewMode === 'dashboard'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+        <div class="bg-gradient-to-r from-stone-900 via-rose-950 to-stone-900 text-stone-100 rounded-3xl p-6 sm:p-10 shadow-xl mb-10 relative overflow-hidden">
+          <div class="relative z-10 max-w-2xl">
+            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-rose-600 text-white mb-3">All Special Moments 💌</span>
+            <h2 class="text-2xl sm:text-4xl font-serif font-bold mb-3">Kado & Ucapan Digital Bertema Spesial</h2>
+            <p class="text-stone-300 text-sm sm:text-base mb-6">Buat halaman ucapan **Anniversary, Ulang Tahun, atau Valentine** bergaya Scrapbook Vintage, Retro 90s, atau Love Overload dalam 1 link unik.</p>
+            
+            <div class="flex flex-wrap gap-2">
+              <button @click="createNewProject('anniversary')" class="px-4 py-2 bg-rose-600 text-white rounded-xl font-bold text-xs shadow-md hover:bg-rose-700 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-heart"></i>
+                <span>+ Anniversary</span>
+              </button>
+              <button @click="createNewProject('birthday')" class="px-4 py-2 bg-purple-600 text-white rounded-xl font-bold text-xs shadow-md hover:bg-purple-700 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-cake-candles"></i>
+                <span>+ Ulang Tahun</span>
+              </button>
+              <button @click="createNewProject('valentine')" class="px-4 py-2 bg-red-600 text-white rounded-xl font-bold text-xs shadow-md hover:bg-red-700 transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-wine-glass"></i>
+                <span>+ Valentine</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-6 flex justify-between items-center">
+          <div>
+            <h3 class="text-xl font-bold text-stone-900">Daftar Ucapan Kamu</h3>
+            <p class="text-xs text-stone-500">Pilih ucapan di bawah ini untuk mengedit atau melihat preview</p>
+          </div>
+        </div>
+
+        <!-- Project Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <template x-for="project in projects" :key="project.id">
+            <div class="bg-white rounded-2xl border border-stone-200 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
+              <div class="h-44 bg-stone-100 relative overflow-hidden">
+                <img :src="project.photos[0] || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'" class="w-full h-full object-cover">
+                
+                <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/90 text-stone-800 shadow-sm backdrop-blur" x-text="getBadgeText(project.type)"></span>
+
+                <span class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm"
+                      :class="project.status === 'published' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : 'bg-amber-100 text-amber-700 border border-amber-200'"
+                      x-text="project.status === 'published' ? 'Aktif' : 'Draft'">
+                </span>
+              </div>
+              <div class="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="font-serif font-bold text-lg text-stone-900 mb-1" x-text="project.title || 'Tanpa Judul'"></h4>
+                  <p class="text-xs text-stone-500 mb-4">
+                    <i class="fa-regular fa-calendar mr-1 text-rose-600"></i>
+                    <span x-text="formatDate(project.startDate)"></span>
+                  </p>
+                </div>
+                
+                <div class="pt-4 border-t border-stone-100 grid grid-cols-2 gap-2 text-xs">
+                  <button @click="editProject(project)" class="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-lg transition flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Edit</span>
+                  </button>
+                  <button @click="openPreview(project)" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold rounded-lg transition flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-eye"></i>
+                    <span>Preview</span>
+                  </button>
+                  <button @click="copyShareLink(project)" class="col-span-2 px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-lg transition flex items-center justify-center space-x-1">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>Copy Link Ucapan</span>
+                  </button>
+                  <button @click="deleteProject(project.id)" class="col-span-2 text-stone-400 hover:text-red-500 text-[11px] py-1 text-center transition">
+                    <i class="fa-solid fa-trash mr-1"></i> Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </main>
+
+      <!-- Editor View -->
+      <main x-show="viewMode === 'editor'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full" x-cloak>
+        <div class="mb-6 flex justify-between items-center">
+          <div>
+            <button @click="viewMode = 'dashboard'" class="text-xs text-stone-500 hover:text-rose-600 mb-1 inline-flex items-center space-x-1">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Kembali ke Dashboard</span>
+            </button>
+            <h3 class="text-2xl font-bold text-stone-900">Edit Moodboard & Desain Ucapan</h3>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button @click="saveProject('draft')" class="px-4 py-2 bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-semibold rounded-xl transition">Simpan Draft</button>
+            <button @click="saveProject('published')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl shadow-md transition flex items-center space-x-1">
+              <i class="fa-solid fa-check"></i>
+              <span>Simpan & Publish</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Editor Form Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <div class="lg:col-span-7 bg-white p-6 sm:p-8 rounded-2xl border border-stone-200 shadow-sm space-y-6">
+            
+            <!-- Selector Kategori Acara -->
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Pilih Jenis Acara</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button @click="activeProject.type = 'anniversary'" class="p-3 rounded-xl border-2 text-center transition" :class="activeProject.type === 'anniversary' ? 'border-rose-500 bg-rose-50 text-rose-700' : 'border-stone-200'">
+                  <i class="fa-solid fa-heart text-lg block mb-1"></i>
+                  <span class="text-xs font-bold">Anniversary</span>
+                </button>
+                <button @click="activeProject.type = 'birthday'" class="p-3 rounded-xl border-2 text-center transition" :class="activeProject.type === 'birthday' ? 'border-purple-500 bg-purple-50 text-purple-700' : 'border-stone-200'">
+                  <i class="fa-solid fa-cake-candles text-lg block mb-1"></i>
+                  <span class="text-xs font-bold">Ulang Tahun</span>
+                </button>
+                <button @click="activeProject.type = 'valentine'" class="p-3 rounded-xl border-2 text-center transition" :class="activeProject.type === 'valentine' ? 'border-red-500 bg-red-50 text-red-700' : 'border-stone-200'">
+                  <i class="fa-solid fa-wine-glass text-lg block mb-1"></i>
+                  <span class="text-xs font-bold">Valentine</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Pilih Gaya & Tampilan Desain -->
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Pilih Tampilan Desain & Layout Spesial</label>
+              <div class="grid grid-cols-2 gap-3">
+                <button @click="activeProject.theme = 'vintage_scrapbook'" class="p-3 rounded-xl border-2 text-left transition flex items-start space-x-2" :class="activeProject.theme === 'vintage_scrapbook' ? 'border-rose-500 bg-rose-50' : 'border-stone-200'">
+                  <div class="text-xl text-amber-700">📜</div>
+                  <div>
+                    <span class="text-xs font-bold block text-stone-800">Vintage Scrapbook</span>
+                    <span class="text-[10px] text-stone-500">Kertas kraft, selotip, polaroid</span>
+                  </div>
+                </button>
+
+                <button @click="activeProject.theme = 'retro_90s'" class="p-3 rounded-xl border-2 text-left transition flex items-start space-x-2" :class="activeProject.theme === 'retro_90s' ? 'border-purple-500 bg-purple-50' : 'border-stone-200'">
+                  <div class="text-xl text-purple-700">👾</div>
+                  <div>
+                    <span class="text-xs font-bold block text-stone-800">Retro 90s Pop</span>
+                    <span class="text-[10px] text-stone-500">Windows 98, pixel art, rame</span>
+                  </div>
+                </button>
+
+                <button @click="activeProject.theme = 'love_overload'" class="p-3 rounded-xl border-2 text-left transition flex items-start space-x-2" :class="activeProject.theme === 'love_overload' ? 'border-red-500 bg-red-50' : 'border-stone-200'">
+                  <div class="text-xl text-red-600">💖</div>
+                  <div>
+                    <span class="text-xs font-bold block text-stone-800">Love Overload</span>
+                    <span class="text-[10px] text-stone-500">Foto Heart Cutout, pita, bucin</span>
+                  </div>
+                </button>
+
+                <button @click="activeProject.theme = 'cozy_chocolate'" class="p-3 rounded-xl border-2 text-left transition flex items-start space-x-2" :class="activeProject.theme === 'cozy_chocolate' ? 'border-amber-900 bg-amber-950 text-white' : 'border-stone-200'">
+                  <div class="text-xl text-amber-400">🍫</div>
+                  <div>
+                    <span class="text-xs font-bold block">Cozy Chocolate</span>
+                    <span class="text-[10px] text-stone-400">Papan kayu hangat & perkamen</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Judul Ucapan -->
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Judul Utama / Nama Pasangan</label>
+              <input type="text" x-model="activeProject.title" placeholder="Contoh: Happy 2nd Anniversary Sayang!" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 focus:outline-none text-sm">
+            </div>
+
+            <!-- Tanggal Dimulai -->
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Tanggal Spesial (Awal Jadian / Tanggal Lahir)</label>
+              <input type="date" x-model="activeProject.startDate" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 focus:outline-none text-sm">
+            </div>
+
+            <!-- Backsound Audio -->
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">URL Lagu MP3 / Backsound</label>
+              <input type="url" x-model="activeProject.audioUrl" placeholder="https://domain.com/lagu-romantis.mp3" class="w-full px-4 py-2.5 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 focus:outline-none text-sm">
+              <span class="text-[10px] text-stone-400 mt-1 block">Saran: Gunakan URL MP3 langsung yang bisa diakses publik.</span>
+            </div>
+
+            <!-- Galeri Foto -->
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <label class="text-xs font-bold text-stone-700 uppercase tracking-wider">Galeri Foto (URL Gambarku)</label>
+                <button @click="addPhoto()" class="text-xs font-bold text-rose-600 hover:text-rose-700">+ Tambah Foto</button>
+              </div>
+              <div class="space-y-2">
+                <template x-for="(photoUrl, index) in activeProject.photos" :key="index">
+                  <div class="flex items-center space-x-2">
+                    <input type="url" x-model="activeProject.photos[index]" class="flex-1 px-3 py-2 rounded-lg border border-stone-300 focus:ring-2 focus:ring-rose-500 focus:outline-none text-xs">
+                    <button @click="removePhoto(index)" class="p-2 text-stone-400 hover:text-red-500 transition">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- Pesan Surat Cinta -->
+            <div>
+              <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">Isi Pesan Surat Cinta / Ucapan</label>
+              <textarea x-model="activeProject.message" rows="5" placeholder="Tuliskan kata-kata indahmu di sini..." class="w-full px-4 py-3 rounded-xl border border-stone-300 focus:ring-2 focus:ring-rose-500 focus:outline-none text-sm"></textarea>
+            </div>
+
+          </div>
+
+          <!-- Side Live Preview Panel -->
+          <div class="lg:col-span-5 flex flex-col items-center">
+            <div class="sticky top-24 w-full bg-stone-200/60 p-4 rounded-3xl border border-stone-300 flex flex-col items-center">
+              <div class="flex justify-between items-center w-full mb-3 px-2">
+                <span class="text-xs font-bold text-stone-600 flex items-center">
+                  <i class="fa-solid fa-mobile-screen mr-1.5"></i> Live Preview Panel
+                </span>
+                <button @click="openPreview(activeProject)" class="text-xs font-bold text-rose-600 hover:underline">
+                  Layar Penuh <i class="fa-solid fa-up-right-from-square text-[10px] ml-0.5"></i>
+                </button>
+              </div>
+              
+              <!-- Mini Preview Frame -->
+              <div class="w-full max-w-xs transform scale-95 origin-top">
+                <div class="bg-white rounded-2xl shadow-lg p-3 text-center border border-stone-200">
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700 inline-block mb-2" x-text="getBadgeText(activeProject.type)"></span>
+                  <h4 class="font-bold text-sm text-stone-800 line-clamp-1" x-text="activeProject.title || 'Judul Momen'"></h4>
+                  <div class="w-full h-36 bg-stone-100 rounded-lg overflow-hidden my-2">
+                    <img :src="activeProject.photos[0] || 'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'" class="w-full h-full object-cover">
+                  </div>
+                  <p class="text-[10px] text-stone-500 line-clamp-2" x-text="activeProject.message || 'Pesan belum diisi...'"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </template>
+
+
+  <!-- ==================== MODAL PANDUAN / ONBOARDING ==================== -->
+  <div x-show="showOnboarding" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" x-cloak>
+    <div @click.outside="showOnboarding = false" class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-stone-100 pb-3">
+        <h3 class="font-serif font-bold text-xl text-stone-900">Cara Penggunaan DearYou.id 💌</h3>
+        <button @click="showOnboarding = false" class="text-stone-400 hover:text-stone-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="space-y-3 text-xs text-stone-600 leading-relaxed">
+        <div class="flex items-start space-x-3">
+          <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold flex-shrink-0">1</span>
+          <p><strong>Pilih Momen:</strong> Tentukan jenis acara (Anniversary, Birthday, atau Valentine).</p>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold flex-shrink-0">2</span>
+          <p><strong>Pilih Tema Desain:</strong> Tersedia pilihan Vintage Scrapbook, Retro 90s, Love Overload, atau Cozy Chocolate.</p>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold flex-shrink-0">3</span>
+          <p><strong>Isi Pesan & Foto:</strong> Masukkan foto kenangan, tanggal spesial, dan pesan romantismu.</p>
+        </div>
+        <div class="flex items-start space-x-3">
+          <span class="w-6 h-6 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold flex-shrink-0">4</span>
+          <p><strong>Bagikan Link:</strong> Klik "Copy Link Ucapan" dan kirimkan tautannya ke si dia!</p>
+        </div>
+      </div>
+      <button @click="showOnboarding = false" class="w-full py-3 bg-rose-600 text-white font-bold text-xs rounded-xl hover:bg-rose-700 transition">Mengerti, Mulai Buat!</button>
+    </div>
+  </div>
+
+</body>
+</html>
