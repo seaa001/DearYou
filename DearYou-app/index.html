@@ -32,6 +32,7 @@
   <!-- External JS Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <!-- Custom Aesthetics & Animations -->
   <style>
@@ -57,6 +58,22 @@
       background: rgba(244, 114, 182, 0.35);
       border-left: 2px dashed rgba(255, 255, 255, 0.8);
       border-right: 2px dashed rgba(255, 255, 255, 0.8);
+    }
+
+    /* Ticket Notch Effect */
+    .ticket-stub {
+      background-image: radial-gradient(circle at 0 50%, transparent 8px, #fff 9px), 
+                        radial-gradient(circle at 100% 50%, transparent 8px, #fff 9px);
+    }
+
+    /* Shake Animation for Incorrect Input */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .animate-shake {
+      animation: shake 0.4s ease-in-out;
     }
 
     /* Candle Flame Animation */
@@ -86,6 +103,15 @@
     }
     .animate-balloon {
       animation: floatUpBalloons 4s ease-in-out infinite;
+    }
+
+    /* Particle Falling Animation */
+    @keyframes particleFall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 0.8; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0.1; }
+    }
+    .animate-particle {
+      animation: particleFall linear infinite;
     }
 
     /* Glow Blobs */
@@ -120,6 +146,14 @@
         toastMessage: '',
         timerInterval: null,
         isCardOpened: false,
+        inputPin: '',
+        isPinUnlocked: false,
+        pinError: false,
+        inputQuiz: '',
+        isQuizUnlocked: false,
+        quizError: false,
+        scratchRevealed: false,
+        nextEventCounter: { days: 0, hours: 0, minutes: 0, seconds: 0 },
 
         counter: {
           years: 0, months: 0, days: 0,
@@ -128,18 +162,199 @@
         },
 
         activeProject: {
-          id: 'demo-1',
-          slug: 'momen-kita',
+          id: 'proj-1',
+          slug: 'love-1001',
           type: 'anniversary',
           theme: 'lovely',
-          title: 'Happy 1st Anniversary My Love',
-          startDate: '2023-02-14T00:00',
+          title: 'Satu Tahun Bersamamu',
+          startDate: new Date().toISOString().slice(0, 16),
           audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
           photos: [
-            'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800',
-            'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800'
+            'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
           ],
-          message: "Terima kasih telah hadir dan mewarnai setiap hariku. Bersamamu, hal-hal sederhana senantiasa terasa hangat dan bermakna. Semoga kita bisa terus tumbuh bersama melewati ribuan hari bahagia lainnya."
+          message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari.',
+          pin: '',
+          quizQuestion: '',
+          quizAnswer: '',
+          nextEventTitle: 'Liburan Bareng',
+          nextEventDate: '',
+          scratchMessage: 'Kamu berhak dapat pelukan hangat kapan saja!',
+          particleEffect: 'petals',
+          vouchers: [
+            { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
+            { title: 'Voucher Traktir Coffee Shop', claimed: false },
+            { title: 'Voucher Nonton Bioskop', claimed: false }
+          ],
+          bucketList: [
+            { text: 'Nonton rekap foto kencan pertama', done: true },
+            { text: 'Piknik sore di taman', done: false },
+            { text: 'Thrift shopping bareng', done: false }
+          ]
+        },
+
+        get bucketProgress() {
+          if (!this.activeProject.bucketList || this.activeProject.bucketList.length === 0) return 0;
+          const done = this.activeProject.bucketList.filter(b => b.done).length;
+          return Math.round((done / this.activeProject.bucketList.length) * 100);
+        },
+
+        checkPin: function() {
+          if (this.inputPin === this.activeProject.pin) {
+            this.isPinUnlocked = true;
+            this.pinError = false;
+            this.triggerConfetti();
+            this.showToast('PIN Benar! Akses dibuka ✨');
+          } else {
+            this.pinError = true;
+            setTimeout(() => { this.pinError = false; }, 500);
+            this.showToast('PIN salah, coba lagi ya!');
+          }
+        },
+
+        checkQuiz: function() {
+          if (this.inputQuiz.toLowerCase().trim() === this.activeProject.quizAnswer.toLowerCase().trim()) {
+            this.isQuizUnlocked = true;
+            this.quizError = false;
+            this.triggerConfetti();
+            this.showToast('Jawaban Benar! 🎉');
+          } else {
+            this.quizError = true;
+            setTimeout(() => { this.quizError = false; }, 500);
+            this.showToast('Jawaban belum tepat, coba ingat-ingat lagi!');
+          }
+        },
+
+        claimVoucher: function(idx) {
+          this.activeProject.vouchers[idx].claimed = true;
+          this.triggerConfetti();
+          this.showToast('🎟️ Voucher berhasil diklaim!');
+        },
+
+        toggleBucket: function(idx) {
+          this.activeProject.bucketList[idx].done = !this.activeProject.bucketList[idx].done;
+          if (this.activeProject.bucketList[idx].done) {
+            this.triggerConfetti();
+          }
+        },
+
+        addVoucherField: function() {
+          if (!this.activeProject.vouchers) this.activeProject.vouchers = [];
+          this.activeProject.vouchers.push({ title: 'Voucher Baru', claimed: false });
+        },
+
+        removeVoucherField: function(idx) {
+          this.activeProject.vouchers.splice(idx, 1);
+        },
+
+        addBucketField: function() {
+          if (!this.activeProject.bucketList) this.activeProject.bucketList = [];
+          this.activeProject.bucketList.push({ text: 'Target Impian Baru', done: false });
+        },
+
+        removeBucketField: function(idx) {
+          this.activeProject.bucketList.splice(idx, 1);
+        },
+
+        updateNextEventCounter: function() {
+          if (!this.activeProject.nextEventDate) return;
+          var target = new Date(this.activeProject.nextEventDate).getTime();
+          var now = new Date().getTime();
+          var diff = target - now;
+
+          if (diff <= 0) {
+            this.nextEventCounter = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+            return;
+          }
+
+          this.nextEventCounter = {
+            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+            seconds: Math.floor((diff % (1000 * 60)) / 1000)
+          };
+        },
+
+        initScratchCard: function() {
+          this.scratchRevealed = false;
+          this.$nextTick(() => {
+            const canvas = document.getElementById('scratchCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#475569';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ GOSOK LAYAR DI SINI ✨', canvas.width / 2, canvas.height / 2 + 4);
+
+            let isDrawing = false;
+            let self = this;
+
+            const checkProgress = () => {
+              if (self.scratchRevealed) return;
+              const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              let transparent = 0;
+              for (let i = 3; i < imgData.data.length; i += 4) {
+                if (imgData.data[i] === 0) transparent++;
+              }
+              if (transparent / (imgData.data.length / 4) > 0.4) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                self.scratchRevealed = true;
+                self.triggerConfetti();
+                self.showToast('🎉 Hadiah Rahasia Terbuka!');
+              }
+            };
+
+            const scratch = (e) => {
+              if (!isDrawing || self.scratchRevealed) return;
+              const rect = canvas.getBoundingClientRect();
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+              
+              const scaleX = canvas.width / rect.width;
+              const scaleY = canvas.height / rect.height;
+              const x = (clientX - rect.left) * scaleX;
+              const y = (clientY - rect.top) * scaleY;
+              
+              ctx.globalCompositeOperation = 'destination-out';
+              ctx.beginPath();
+              ctx.arc(x, y, 22, 0, Math.PI * 2);
+              ctx.fill();
+              checkProgress();
+            };
+
+            canvas.onmousedown = () => isDrawing = true;
+            canvas.onmouseup = () => isDrawing = false;
+            canvas.onmouseleave = () => isDrawing = false;
+            canvas.onmousemove = scratch;
+            canvas.ontouchstart = (e) => { isDrawing = true; scratch(e); };
+            canvas.ontouchend = () => isDrawing = false;
+            canvas.ontouchmove = scratch;
+          });
+        },
+
+        exportToImage: function() {
+          const cardEl = document.getElementById('exportableCard');
+          if (!cardEl) return;
+          this.showToast('Sedang menyiapkan gambar...');
+          
+          html2canvas(cardEl, { 
+            scale: 2, 
+            useCORS: true,
+            ignoreElements: (el) => el.classList.contains('no-export')
+          }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = (this.activeProject.title || 'kartu-ucapan') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            this.showToast('📷 Gambar berhasil diunduh ke Galeri!');
+          }).catch(() => {
+            this.showToast('Gagal mengunduh gambar.');
+          });
         },
 
         projects: [],
@@ -147,7 +362,7 @@
         globalProjects: [
           {
             id: 'global-1',
-            slug: 'momen-indah-global',
+            slug: 'momen-indah-lovely',
             type: 'anniversary',
             theme: 'lovely',
             title: 'Satu Tahun Bersamamu',
@@ -156,33 +371,87 @@
             photos: [
               'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
             ],
-            message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari. Semoga perjalanan cinta kita terus berlanjut hingga nanti.'
+            message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari. Semoga perjalanan cinta kita terus berlanjut hingga nanti.',
+            scratchMessage: 'Hadiah Spesial: Traktir makan malam romantis minggu ini! ❤️',
+            particleEffect: 'petals',
+            vouchers: [
+              { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
+              { title: 'Voucher Traktir Coffee Shop', claimed: false }
+            ],
+            bucketList: [
+              { text: 'Jalan-jalan ke pantai bareng', done: true },
+              { text: 'Masak makan malam berdua', done: false }
+            ]
           },
           {
             id: 'global-2',
-            slug: 'hbd-sayang-global',
-            type: 'birthday',
-            theme: 'retro',
-            title: 'Happy Birthday My Dearest!',
-            startDate: '2022-08-20T00:00',
+            slug: 'memory-pin-moodboard',
+            type: 'anniversary',
+            theme: 'moodboard',
+            title: 'Koleksi Cerita Kita',
+            startDate: '2022-11-10T00:00',
             audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
             photos: [
               'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800'
             ],
-            message: 'Selamat ulang tahun! Panjang umur, sehat selalu, dan makin sayang sama aku ya.'
+            message: 'Setiap lembar kenangan bersamamu selalu tersimpan rapi. Terima kasih telah menemani setiap langkah dan perjalanan ini.'
           },
           {
             id: 'global-3',
-            slug: 'valentine-special-global',
+            slug: 'ultah-retro-surprise',
+            type: 'birthday',
+            theme: 'retro',
+            title: 'Selamat Ulang Tahun Sayang!',
+            startDate: '1998-05-20T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Selamat ulang tahun untuk orang paling spesial! Semoga semua impian dan harapanmu tercapai di tahun ini.',
+            scratchMessage: 'Bonus: Tiket bebas pilih film favorit di bioskop!',
+            particleEffect: 'fireworks'
+          },
+          {
+            id: 'global-4',
+            slug: 'vintage-love-letter',
+            type: 'anniversary',
+            theme: 'vintage',
+            title: 'Surat Cinta Klasik',
+            startDate: '2021-08-17T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Waktu berlalu begitu cepat, tetapi ketahuilah bahwa perasaan ini tidak pernah pudar sedikit pun oleh waktu.',
+            particleEffect: 'stars'
+          },
+          {
+            id: 'global-5',
+            slug: 'valentine-doodle-journal',
             type: 'valentine',
             theme: 'doodle',
             title: 'Happy Valentine\'s Day',
             startDate: '2024-02-14T00:00',
             audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
             photos: [
-              'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
+              'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&q=80&w=800'
             ],
-            message: 'Setiap hari terasa seperti Valentine bersamamu. Love you to the moon and back!'
+            message: 'Hari kasih sayang jadi lebih bermakna karena ada kamu di hidupku. Terima kasih selalu ada!',
+            particleEffect: 'petals'
+          },
+          {
+            id: 'global-6',
+            slug: 'lovely-birthday-special',
+            type: 'birthday',
+            theme: 'lovely',
+            title: 'Momen Bahagia Ulang Tahun',
+            startDate: '2000-12-25T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Nikmati hari spesialmu ini dengan senyuman terbaik. Terima kasih sudah hadir membuat dunia lebih indah.',
+            scratchMessage: 'Kado Rahasia: Pelukan hangat 24/7!'
           }
         ],
 
@@ -204,7 +473,6 @@
           var dataParam = urlParams.get('data');
           var slugParam = urlParams.get('slug');
 
-          // READ DIRECTLY FROM ENCODED URL DATA
           if (dataParam) {
             try {
               var decodedJson = decodeURIComponent(atob(dataParam));
@@ -220,7 +488,6 @@
             }
           }
 
-          // FALLBACK LOCAL SLUG SEARCH
           if (slugParam) {
             var found = null;
             var allProjects = this.projects.concat(this.globalProjects);
@@ -243,9 +510,10 @@
         openCardInteractive: function() {
           this.isCardOpened = true;
           this.triggerConfetti();
+          this.initScratchCard();
           
           var audioEl = document.getElementById('bgAudio');
-          if (audioEl) {
+          if (audioEl && this.activeProject.audioUrl) {
             var self = this;
             audioEl.play().then(function() {
               self.isAudioPlaying = true;
@@ -276,7 +544,21 @@
             photos: [
               'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
             ],
-            message: ''
+            message: '',
+            pin: '',
+            quizQuestion: '',
+            quizAnswer: '',
+            nextEventTitle: '',
+            nextEventDate: '',
+            scratchMessage: 'Kamu berhak dapat pelukan hangat dan es krim!',
+            particleEffect: 'petals',
+            vouchers: [
+              { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
+              { title: 'Voucher Traktir Coffee Shop', claimed: false }
+            ],
+            bucketList: [
+              { text: 'Liburan bareng ke pantai', done: false }
+            ]
           };
           this.viewMode = 'editor';
         },
@@ -288,7 +570,7 @@
 
         saveProject: function() {
           if (!this.activeProject.title || !this.activeProject.message) {
-            alert('Mohon isi judul ucapan dan pesan terlebih dahulu.');
+            this.showToast('⚠️ Mohon isi judul ucapan dan pesan!');
             return;
           }
 
@@ -326,6 +608,10 @@
 
         openPreview: function(proj) {
           this.activeProject = JSON.parse(JSON.stringify(proj));
+          this.isPinUnlocked = !this.activeProject.pin;
+          this.isQuizUnlocked = !this.activeProject.quizQuestion;
+          this.inputPin = '';
+          this.inputQuiz = '';
           this.viewMode = 'public';
           this.isRecipientView = false;
           this.isCardOpened = false;
@@ -345,9 +631,9 @@
             } else {
               prompt('Salin link ucapan berikut:', shareUrl);
             }
-            this.showToast('Link ucapan berhasil disalin! Sekarang bisa dibuka di HP siapa saja.');
+            this.showToast('Link ucapan berhasil disalin!');
           } catch (e) {
-            alert('Gagal membuat link: ' + e.message);
+            this.showToast('Gagal membuat link tautan.');
           }
         },
 
@@ -360,13 +646,16 @@
           if (this.activeProject.photos.length > 1) {
             this.activeProject.photos.splice(idx, 1);
           } else {
-            alert('Minimal harus menyertakan 1 foto.');
+            this.showToast('Minimal harus menyertakan 1 foto.');
           }
         },
 
         toggleAudio: function() {
           var audioEl = document.getElementById('bgAudio');
-          if (!audioEl) return;
+          if (!audioEl || !this.activeProject.audioUrl) {
+            this.showToast('Belum ada tautan musik yang diisi.');
+            return;
+          }
 
           if (this.isAudioPlaying) {
             audioEl.pause();
@@ -376,7 +665,7 @@
             audioEl.play().then(function() {
               self.isAudioPlaying = true;
             }).catch(function() {
-              alert('Sentuh layar sekali lagi untuk mengizinkan musik diputar.');
+              self.showToast('Sentuh layar sekali lagi untuk memutar musik.');
             });
           }
         },
@@ -413,8 +702,10 @@
           if (this.timerInterval) clearInterval(this.timerInterval);
           var self = this;
           this.updateCounter();
+          this.updateNextEventCounter();
           this.timerInterval = setInterval(function() {
             self.updateCounter();
+            self.updateNextEventCounter();
           }, 1000);
         },
 
@@ -508,8 +799,8 @@
             <span class="inline-block bg-white/10 text-rose-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-white/10">
               Personalized Greeting App
             </span>
-            <h2 class="text-2xl md:text-3xl font-serif font-bold text-white leading-tight">Kejutkan Pasangan Anda Dengan Kartu Ucapan Digital</h2>
-            <p class="text-slate-300 text-xs md:text-sm leading-relaxed">Lengkap dengan hitungan detik bersama, galeri foto, lagu favorit, dan 5 pilihan gaya tampilan moodboard estetik.</p>
+            <h2 class="text-2xl md:text-3xl font-serif font-bold text-white leading-tight">Kejutkan Pasangan Anda dengan Kartu Ucapan Digital</h2>
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed">Lengkap dengan hitungan detik bersama, galeri foto, kuis kenangan, kupon cinta, dan efek interaktif.</p>
 
             <div class="pt-2 flex flex-wrap gap-2">
               <button @click="createNewProject('anniversary')" class="bg-white text-slate-900 font-bold px-4 py-2 rounded-xl text-xs hover:bg-slate-100 transition-all active:scale-95">
@@ -579,7 +870,7 @@
       <div x-show="viewMode === 'editor'" class="max-w-2xl mx-auto bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl space-y-6 animate-fade-in">
         <div class="border-b border-slate-100 pb-3">
           <h2 class="text-xl font-serif font-bold text-slate-800">Edit Kartu Ucapan</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Atur momen, pilih tema gaya moodboard, foto, dan lagu.</p>
+          <p class="text-xs text-slate-400 mt-0.5">Atur momen, tema, kuis, voucher, dan fitur interaktif lainnya.</p>
         </div>
 
         <div>
@@ -657,11 +948,51 @@
           <input type="datetime-local" x-model="activeProject.startDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
         </div>
 
-        <div>
-          <label class="text-xs font-bold text-slate-700">Link Musik Background (.mp3)</label>
-          <input type="text" x-model="activeProject.audioUrl" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+        <!-- FITUR PRIVASI & KUIS -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🔒 Personalisasi & Kuis Keamanan</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Proteksi PIN (4 Digit / Opsional)</label>
+              <input type="password" maxlength="4" x-model="activeProject.pin" placeholder="Misal: 1211" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Jawaban Kuis Romantis</label>
+              <input type="text" x-model="activeProject.quizAnswer" placeholder="Misal: Cafe Monokrom" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-700">Pertanyaan Kuis Romantis (Opsional)</label>
+            <input type="text" x-model="activeProject.quizQuestion" placeholder="Contoh: Di mana tempat pertama kali kita kencan?" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+          </div>
         </div>
 
+        <!-- MUSIK & PARTIKEL -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🎵 Musik & Visual Particles</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-bold text-slate-700">Link Musik Background (.mp3)</label>
+              <input type="text" x-model="activeProject.audioUrl" placeholder="https://..." class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Efek Partikel Visual</label>
+              <select x-model="activeProject.particleEffect" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800">
+                <option value="petals">Kelopak Bunga Gugur 🌸</option>
+                <option value="fireworks">Kembang Api ✨</option>
+                <option value="stars">Bintang Menyala ⭐</option>
+                <option value="none">Tanpa Efek Partikel</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOTO POLAROID -->
         <div>
           <div class="flex items-center justify-between mb-1">
             <label class="text-xs font-bold text-slate-700">Daftar Link Foto Polaroid</label>
@@ -675,9 +1006,61 @@
           </template>
         </div>
 
+        <!-- PESAN & GOSOK HADIAH -->
         <div>
           <label class="text-xs font-bold text-slate-700">Pesan Romantis / Surat Cinta</label>
-          <textarea x-model="activeProject.message" rows="5" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 leading-relaxed font-medium"></textarea>
+          <textarea x-model="activeProject.message" rows="4" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 leading-relaxed font-medium"></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700">Pesan Rahasia Scratch Card (Kartu Gosok)</label>
+          <input type="text" x-model="activeProject.scratchMessage" placeholder="Misal: Kamu berhak dapat pelukan hangat dan es krim!" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+        </div>
+
+        <!-- COUNTDOWN EVENT -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">⏳ Countdown Event Mendatang</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Nama Acara / Event</label>
+              <input type="text" x-model="activeProject.nextEventTitle" placeholder="Misal: Liburan Bali" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Tanggal Acara</label>
+              <input type="datetime-local" x-model="activeProject.nextEventDate" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+          </div>
+        </div>
+
+        <!-- KUPON CINTA & BUCKET LIST -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Vouchers -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🎟️ Kupon Cinta Custom</h3>
+              <button @click="addVoucherField()" class="text-[10px] font-bold text-slate-900 hover:underline">+ Tambah</button>
+            </div>
+            <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+              <div class="flex gap-2 mb-2">
+                <input type="text" x-model="activeProject.vouchers[idx].title" class="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-xs" />
+                <button @click="removeVoucherField(idx)" class="text-rose-500 font-bold text-xs px-2">✕</button>
+              </div>
+            </template>
+          </div>
+
+          <!-- Bucket List -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Future Bucket List</h3>
+              <button @click="addBucketField()" class="text-[10px] font-bold text-slate-900 hover:underline">+ Tambah</button>
+            </div>
+            <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+              <div class="flex gap-2 mb-2">
+                <input type="text" x-model="activeProject.bucketList[idx].text" class="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-xs" />
+                <button @click="removeBucketField(idx)" class="text-rose-500 font-bold text-xs px-2">✕</button>
+              </div>
+            </template>
+          </div>
         </div>
 
         <div class="pt-2 flex gap-3">
@@ -699,25 +1082,68 @@
              'bg-[#f0e7d5] text-stone-900': activeProject.theme === 'vintage',
              'bg-doodle-grid text-slate-900': activeProject.theme === 'doodle'
            }" 
-           class="min-h-[92vh] flex flex-col items-center justify-center p-3 md:p-6 relative transition-all duration-500 animate-fade-in rounded-3xl">
+           class="min-h-[92vh] flex flex-col items-center justify-center p-3 md:p-6 relative transition-all duration-500 animate-fade-in rounded-3xl overflow-hidden">
         
         <audio id="bgAudio" :src="activeProject.audioUrl" loop></audio>
 
-        <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40">
+        <!-- VISUAL PARTICLES BACKGROUND -->
+        <template x-if="activeProject.particleEffect && activeProject.particleEffect !== 'none'">
+          <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 no-export">
+            <template x-for="n in 16" :key="n">
+              <div class="absolute animate-particle text-xl select-none"
+                   :style="`left: ${Math.random() * 100}%; animation-duration: ${3 + Math.random() * 5}s; animation-delay: ${Math.random() * 4}s; opacity: ${0.4 + Math.random() * 0.6};`"
+                   x-text="activeProject.particleEffect === 'petals' ? '🌸' : (activeProject.particleEffect === 'fireworks' ? '✨' : '⭐')">
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- FLOATING CONTROLS (AUDIO & DASHBOARD) -->
+        <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40 no-export">
           <button @click="viewMode = 'dashboard'" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all">
             Dashboard
           </button>
         </div>
 
-        <div class="fixed top-4 right-4 z-40">
-          <button @click="toggleAudio()" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full" :class="isAudioPlaying ? 'bg-rose-500 animate-ping' : 'bg-slate-300'"></span>
-            <span x-text="isAudioPlaying ? 'Musik Playing' : 'Putar Musik'"></span>
+        <div class="fixed top-4 right-4 z-40 flex flex-wrap justify-end gap-2 no-export">
+          <button @click="toggleAudio()" class="bg-white/90 backdrop-blur-md text-slate-800 px-3.5 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full" :class="isAudioPlaying ? 'bg-rose-500 animate-ping' : 'bg-slate-300'"></span>
+            <span x-text="isAudioPlaying ? '🎵 Musik On' : '🎵 Musik Off'"></span>
           </button>
         </div>
 
+        <!-- STEP 1: PROTEKSI PIN (JIKA ADA PIN & BELUM DIUNLOCK) -->
+        <div x-show="activeProject.pin && !isPinUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-10">
+          <div :class="{ 'animate-shake border-rose-400': pinError }" class="bg-white/90 backdrop-blur-xl border border-slate-200 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
+            <div class="w-14 h-14 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">🔒</div>
+            <h3 class="font-bold text-slate-800 text-base">Kartu Dilindungi PIN</h3>
+            <p class="text-xs text-slate-500">Masukkan 4 digit PIN / Tanggal Spesial untuk membuka pesan rahasia ini.</p>
+            
+            <input type="password" maxlength="4" x-model="inputPin" @keyup.enter="checkPin()" placeholder="****" class="w-full text-center text-2xl tracking-widest bg-slate-50 border border-slate-300 rounded-2xl p-3 focus:outline-none focus:border-rose-500 font-mono shadow-inner" />
+            
+            <button @click="checkPin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md">
+              Buka Kunci PIN
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: KUIS ROMANTIS (JIKA ADA KUIS & BELUM DIUNLOCK) -->
+        <div x-show="isPinUnlocked && activeProject.quizQuestion && !isQuizUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-10">
+          <div :class="{ 'animate-shake border-rose-400': quizError }" class="bg-white/90 backdrop-blur-xl border border-slate-200 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
+            <div class="w-14 h-14 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">❓</div>
+            <h3 class="font-bold text-slate-800 text-base">Kuis Uji Kenangan</h3>
+            <p class="text-xs text-rose-600 font-semibold bg-rose-50 p-3 rounded-xl border border-rose-100 leading-relaxed" x-text="activeProject.quizQuestion"></p>
+            
+            <input type="text" x-model="inputQuiz" @keyup.enter="checkQuiz()" placeholder="Tulis jawabanmu di sini..." class="w-full text-center bg-slate-50 border border-slate-300 rounded-2xl p-3 text-xs focus:outline-none focus:border-rose-500 font-medium shadow-inner" />
+            
+            <button @click="checkQuiz()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md">
+              Jawab & Buka Kartu
+            </button>
+          </div>
+        </div>
+
         <!-- UNOPENED CARD -->
-        <div x-show="!isCardOpened" class="w-full max-w-md my-auto animate-fade-in">
+        <div x-show="(isPinUnlocked || !activeProject.pin) && (isQuizUnlocked || !activeProject.quizQuestion) && !isCardOpened" class="w-full max-w-md my-auto animate-fade-in relative z-10">
           
           <div :class="{
                  'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-8 text-center': activeProject.theme === 'lovely',
@@ -875,15 +1301,15 @@
         </div>
 
         <!-- OPENED CARD -->
-        <div x-show="isCardOpened" 
+        <div x-show="isCardOpened" id="exportableCard" 
              :class="{
-               'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-6 md:p-8': activeProject.theme === 'lovely',
+               'bg-white/90 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-6 md:p-8': activeProject.theme === 'lovely',
                'bg-white border border-stone-300 shadow-xl rounded-none p-6 md:p-8 relative': activeProject.theme === 'moodboard',
                'bg-slate-900 border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] rounded-none p-6 md:p-8': activeProject.theme === 'retro',
                'bg-[#fdfaf3] border border-amber-900/30 shadow-2xl rounded-none p-6 md:p-8 relative': activeProject.theme === 'vintage',
                'bg-doodle-grid border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-6 md:p-8': activeProject.theme === 'doodle'
              }" 
-             class="max-w-md w-full my-8 space-y-6 text-center transition-all duration-300">
+             class="max-w-md w-full my-8 space-y-6 text-center transition-all duration-300 relative z-10">
 
           <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-2 -mx-2 mb-4">
             <span>DEARYOU_CARD.EXE</span>
@@ -1002,14 +1428,14 @@
 
           <!-- Photo Gallery -->
           <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
-            <div class="relative overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 aspect-[4/3]">
-              <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover transition-all duration-300" alt="Moment Photo" />
+            <div class="relative overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 aspect-[4/3] shadow-inner">
+              <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover transition-all duration-300 hover:scale-105" alt="Moment Photo" />
             </div>
             
             <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
               <template x-for="(photo, idx) in activeProject.photos" :key="idx">
                 <button @click="activePhotoIndex = idx" 
-                        :class="activePhotoIndex === idx ? 'ring-2 ring-rose-500 scale-105' : 'opacity-60 hover:opacity-100'" 
+                        :class="activePhotoIndex === idx ? 'ring-2 ring-rose-500 scale-105 shadow-md' : 'opacity-60 hover:opacity-100'" 
                         class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 transition-all">
                   <img :src="photo" class="w-full h-full object-cover" />
                 </button>
@@ -1032,6 +1458,92 @@
                  'font-mono text-xs leading-relaxed text-stone-800 whitespace-pre-line': activeProject.theme === 'vintage',
                  'font-hand text-lg leading-relaxed text-slate-900 whitespace-pre-line': activeProject.theme === 'doodle'
                }" x-text="activeProject.message"></p>
+          </div>
+
+          <!-- 1. GOSOK HADIAH (SCRATCH CARD) -->
+          <div x-show="activeProject.scratchMessage" class="bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200 rounded-2xl p-4 text-center space-y-2 shadow-sm">
+            <span class="text-xs font-bold text-rose-700 uppercase tracking-wider block">✨ Gosok Hadiah Rahasia ✨</span>
+            <div class="relative w-full max-w-[240px] h-20 mx-auto rounded-xl overflow-hidden border border-rose-200 bg-white flex items-center justify-center p-3 text-center shadow-inner">
+              <p class="text-xs font-bold text-rose-900 leading-tight" x-text="activeProject.scratchMessage"></p>
+              <canvas id="scratchCanvas" width="240" height="80" class="absolute inset-0 cursor-pointer touch-none z-10 transition-opacity duration-300"></canvas>
+            </div>
+          </div>
+
+          <!-- 2. COUNTDOWN EVENT MENDATANG -->
+          <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-slate-900 text-white rounded-2xl p-4 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-rose-300 uppercase tracking-widest" x-text="'⏳ Event: ' + activeProject.nextEventTitle"></span>
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.days"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Hari</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.hours"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Jam</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.minutes"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Menit</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.seconds"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Detik</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. VOUCHER / KUPON CINTA CUSTOM -->
+          <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-3 text-left">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider text-center">🎟️ Voucher Cinta Spesial</h3>
+            <div class="space-y-2.5">
+              <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                <div class="ticket-stub bg-white border border-rose-200 rounded-xl p-3.5 flex items-center justify-between shadow-sm relative overflow-hidden transition-all hover:shadow-md">
+                  <div class="pr-2 space-y-0.5">
+                    <p class="font-bold text-xs text-slate-800" x-text="v.title"></p>
+                    <span class="text-[9px] font-semibold text-rose-500 block" x-text="v.claimed ? '✓ Voucher Telah Diklaim' : '• Masa Berlaku: Kapan Saja'"></span>
+                  </div>
+                  
+                  <button @click="claimVoucher(idx)" :disabled="v.claimed"
+                          :class="v.claimed ? 'bg-emerald-500 text-white cursor-default' : 'bg-rose-500 hover:bg-rose-600 text-white active:scale-95 shadow-md shadow-rose-200'"
+                          class="px-3.5 py-2 rounded-xl text-[11px] font-bold transition-all shrink-0">
+                    <span x-text="v.claimed ? 'TERKLAIM' : 'Klaim'"></span>
+                  </button>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- 4. FUTURE BUCKET LIST -->
+          <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-3 text-left">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Target Impian Bersama</h3>
+              <span class="text-[10px] font-bold text-rose-500" x-text="bucketProgress + '% Terwujud'"></span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-pink-500 to-rose-500 h-full transition-all duration-500 rounded-full" :style="`width: ${bucketProgress}%`"></div>
+            </div>
+
+            <div class="bg-white/80 border border-slate-200 rounded-2xl p-3.5 space-y-2 shadow-sm">
+              <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                <label @click="toggleBucket(idx)" class="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                  <input type="checkbox" :checked="b.done" class="w-4 h-4 accent-rose-500 rounded cursor-pointer transition-transform active:scale-125" />
+                  <span class="text-xs font-medium text-slate-700 transition-all" :class="{ 'line-through text-slate-400 font-normal': b.done }" x-text="b.text"></span>
+                </label>
+              </template>
+            </div>
+          </div>
+
+          <!-- 5. TOMBOL EKSPOR GAMBAR PNG -->
+          <div class="pt-4 border-t border-slate-200/60 no-export">
+            <button @click="exportToImage()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+              <span>📷 Simpan Kartu Ucapan (.PNG)</span>
+            </button>
           </div>
 
         </div>
