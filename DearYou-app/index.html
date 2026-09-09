@@ -112,8 +112,8 @@
     function dearyouApp() {
       return {
         viewMode: 'dashboard',
-        dashboardTab: 'my', // Mode dashboard: 'my' (Milik Saya) atau 'global' (Hasil Global)
-        isRecipientView: false, // Flag untuk membedakan pembuat vs penerima link
+        dashboardTab: 'my',
+        isRecipientView: false,
         isAudioPlaying: false,
         activePhotoIndex: 0,
         copiedToast: false,
@@ -127,12 +127,11 @@
           totalDays: 0
         },
 
-        // DEFAULT DATA
         activeProject: {
           id: 'demo-1',
           slug: 'momen-kita',
-          type: 'anniversary', // anniversary, birthday, valentine
-          theme: 'lovely',      // lovely, moodboard, retro, vintage, doodle
+          type: 'anniversary',
+          theme: 'lovely',
           title: 'Happy 1st Anniversary My Love',
           startDate: '2023-02-14T00:00',
           audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
@@ -145,7 +144,6 @@
 
         projects: [],
 
-        // FITUR BARU: KOLEKSI KARTU GLOBAL (KOMUNITAS / PUBLIK)
         globalProjects: [
           {
             id: 'global-1',
@@ -188,7 +186,6 @@
           }
         ],
 
-        // GETTER UNTUK MENAMPILKAN KARTU SESUAI TAB AKTIF
         get displayedProjects() {
           return this.dashboardTab === 'global' ? this.globalProjects : this.projects;
         },
@@ -204,9 +201,26 @@
           }
 
           var urlParams = new URLSearchParams(window.location.search);
+          var dataParam = urlParams.get('data');
           var slugParam = urlParams.get('slug');
 
-          // JIKA DIBUKA VIA LINK SHARE (PENERIMA / SI B)
+          // READ DIRECTLY FROM ENCODED URL DATA
+          if (dataParam) {
+            try {
+              var decodedJson = decodeURIComponent(atob(dataParam));
+              var parsedCard = JSON.parse(decodedJson);
+              this.activeProject = parsedCard;
+              this.viewMode = 'public';
+              this.isRecipientView = true;
+              this.isCardOpened = false;
+              this.startLiveCounter();
+              return;
+            } catch(e) {
+              console.error("Gagal membaca data dari link", e);
+            }
+          }
+
+          // FALLBACK LOCAL SLUG SEARCH
           if (slugParam) {
             var found = null;
             var allProjects = this.projects.concat(this.globalProjects);
@@ -220,7 +234,7 @@
               this.activeProject = JSON.parse(JSON.stringify(found));
             }
             this.viewMode = 'public';
-            this.isRecipientView = true; // PENERIMA LINK: Tombol Dashboard Sembunyi
+            this.isRecipientView = true;
             this.isCardOpened = false;
             this.startLiveCounter();
           }
@@ -310,11 +324,10 @@
           }
         },
 
-        // UNTUK PEMBUAT (SI A) INTIP PREVIEW KARTU
         openPreview: function(proj) {
           this.activeProject = JSON.parse(JSON.stringify(proj));
           this.viewMode = 'public';
-          this.isRecipientView = false; // PEMBUAT: Bisa kembali ke Dashboard
+          this.isRecipientView = false;
           this.isCardOpened = false;
           this.activePhotoIndex = 0;
           this.startLiveCounter();
@@ -322,15 +335,20 @@
 
         copyShareLink: function(proj) {
           var target = proj || this.activeProject;
-          var shareUrl = window.location.origin + window.location.pathname + '?slug=' + target.slug;
+          try {
+            var jsonStr = JSON.stringify(target);
+            var encodedData = btoa(encodeURIComponent(jsonStr));
+            var shareUrl = window.location.origin + window.location.pathname + '?data=' + encodedData;
 
-          if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(shareUrl);
-          } else {
-            prompt('Salin link ucapan berikut:', shareUrl);
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(shareUrl);
+            } else {
+              prompt('Salin link ucapan berikut:', shareUrl);
+            }
+            this.showToast('Link ucapan berhasil disalin! Sekarang bisa dibuka di HP siapa saja.');
+          } catch (e) {
+            alert('Gagal membuat link: ' + e.message);
           }
-
-          this.showToast('Link ucapan telah disalin. Silakan bagikan ke pasangan Anda.');
         },
 
         addPhotoField: function() {
@@ -456,7 +474,7 @@
   <!-- APP ROOT -->
   <div x-data="dearyouApp()" x-init="initApp()" class="flex-1 flex flex-col min-h-screen relative z-10" x-cloak>
 
-    <!-- HEADER NAVIGATION (DASHBOARD & EDITOR ONLY) -->
+    <!-- HEADER NAVIGATION -->
     <header x-show="viewMode !== 'public'" class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
       <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2 cursor-pointer" @click="viewMode = 'dashboard'">
@@ -481,7 +499,7 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
 
-      <!-- ================= 1. DASHBOARD VIEW (PEMBUAT/SI A) ================= -->
+      <!-- ================= 1. DASHBOARD VIEW ================= -->
       <div x-show="viewMode === 'dashboard'" class="space-y-6 animate-fade-in">
 
         <!-- Hero Card -->
@@ -507,14 +525,13 @@
           </div>
         </div>
 
-        <!-- FITUR BARU: Title Header + Tab Switcher (Hasil Milik Saya vs Hasil Global) -->
+        <!-- Header + Tab Switcher -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
           <div class="flex items-center gap-3">
             <h3 class="font-serif font-bold text-lg text-slate-800">Koleksi Kartu Ucapan</h3>
             <span class="text-xs text-slate-400 font-medium" x-text="displayedProjects.length + (dashboardTab === 'my' ? ' Kartu Tersimpan' : ' Kartu Publik')"></span>
           </div>
 
-          <!-- TAB SWITCHER MODE -->
           <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-semibold self-start sm:self-auto">
             <button @click="dashboardTab = 'my'" 
                     :class="dashboardTab === 'my' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
@@ -543,7 +560,6 @@
                 <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed" x-text="p.message"></p>
               </div>
 
-              <!-- Buttons -->
               <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
                 <button @click="copyShareLink(p)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
                   Salin Link
@@ -559,14 +575,13 @@
         </div>
       </div>
 
-      <!-- ================= 2. EDITOR VIEW (DENGAN MOODBOARD THEME PICKER) ================= -->
+      <!-- ================= 2. EDITOR VIEW ================= -->
       <div x-show="viewMode === 'editor'" class="max-w-2xl mx-auto bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl space-y-6 animate-fade-in">
         <div class="border-b border-slate-100 pb-3">
           <h2 class="text-xl font-serif font-bold text-slate-800">Edit Kartu Ucapan</h2>
           <p class="text-xs text-slate-400 mt-0.5">Atur momen, pilih tema gaya moodboard, foto, dan lagu.</p>
         </div>
 
-        <!-- 1. PILIHAN MOMEN -->
         <div>
           <label class="text-xs font-bold text-slate-700">1. Pilihan Momen Spesial</label>
           <select x-model="activeProject.type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium">
@@ -576,7 +591,6 @@
           </select>
         </div>
 
-        <!-- 2. PEMILIH TEMA MOODBOARD COLLAGE -->
         <div>
           <div class="flex items-center justify-between mb-2">
             <label class="text-xs font-bold text-slate-700">2. Pilih Tampilan Tema (Gaya Moodboard Collage)</label>
@@ -586,7 +600,6 @@
           <div class="bg-moodboard-pattern p-4 md:p-6 rounded-2xl border border-stone-300 relative overflow-hidden shadow-inner">
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
               
-              <!-- SWATCH 1: LOVELY -->
               <button @click="activeProject.theme = 'lovely'" 
                       :class="activeProject.theme === 'lovely' ? 'ring-4 ring-rose-500 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-gradient-to-br from-pink-100 to-rose-200 p-4 rounded-2xl border border-pink-300 text-left transition-all -rotate-2 shadow-md relative">
@@ -596,7 +609,6 @@
                 <span class="block text-[9px] text-pink-700 mt-1 leading-tight">Pink lembut, glassmorphism, & font serif romantis.</span>
               </button>
 
-              <!-- SWATCH 2: MOODBOARD -->
               <button @click="activeProject.theme = 'moodboard'" 
                       :class="activeProject.theme === 'moodboard' ? 'ring-4 ring-slate-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-white p-4 rounded-none border border-slate-300 text-left transition-all rotate-2 shadow-md relative">
@@ -606,7 +618,6 @@
                 <span class="block text-[9px] text-slate-500 mt-1 leading-tight">Kolase foto, paper clip, & kertas memo terpisah.</span>
               </button>
 
-              <!-- SWATCH 3: RETRO -->
               <button @click="activeProject.theme = 'retro'" 
                       :class="activeProject.theme === 'retro' ? 'ring-4 ring-cyan-400 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-slate-900 p-4 rounded-none border-2 border-cyan-400 text-left transition-all -rotate-1 shadow-md relative">
@@ -615,7 +626,6 @@
                 <span class="block text-[9px] text-slate-300 mt-1 leading-tight">Jendela OS klasik, font piksel, & warna neon.</span>
               </button>
 
-              <!-- SWATCH 4: VINTAGE -->
               <button @click="activeProject.theme = 'vintage'" 
                       :class="activeProject.theme === 'vintage' ? 'ring-4 ring-amber-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-[#e8decb] p-4 rounded-none border border-amber-900/30 text-left transition-all rotate-3 shadow-md relative">
@@ -625,7 +635,6 @@
                 <span class="block text-[9px] text-amber-900/80 mt-1 leading-tight">Kertas kraft tua, mesin ketik, & stempel pos.</span>
               </button>
 
-              <!-- SWATCH 5: JOURNAL DOODLE -->
               <button @click="activeProject.theme = 'doodle'" 
                       :class="activeProject.theme === 'doodle' ? 'ring-4 ring-purple-600 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
                       class="bg-doodle-grid p-4 rounded-lg border-2 border-slate-800 text-left transition-all -rotate-2 shadow-md relative">
@@ -665,6 +674,7 @@
             </div>
           </template>
         </div>
+
         <div>
           <label class="text-xs font-bold text-slate-700">Pesan Romantis / Surat Cinta</label>
           <textarea x-model="activeProject.message" rows="5" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 leading-relaxed font-medium"></textarea>
@@ -693,7 +703,6 @@
         
         <audio id="bgAudio" :src="activeProject.audioUrl" loop></audio>
 
-        <!-- Top Navigation Bar -->
         <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40">
           <button @click="viewMode = 'dashboard'" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all">
             Dashboard
@@ -707,7 +716,7 @@
           </button>
         </div>
 
-        <!-- ================= PEMBUKA KARTU (MENYATU SESUAI TEMA & MOMEN) ================= -->
+        <!-- UNOPENED CARD -->
         <div x-show="!isCardOpened" class="w-full max-w-md my-auto animate-fade-in">
           
           <div :class="{
@@ -725,7 +734,7 @@
             <div x-show="activeProject.theme === 'moodboard'" class="washi-tape absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5"></div>
             <div x-show="activeProject.theme === 'vintage'" class="w-8 h-8 border-2 border-dashed border-amber-800/40 absolute top-3 right-3 text-[9px] flex items-center justify-center font-mono">GIFT</div>
 
-            <!-- MOMEN 1: ANNIVERSARY -->
+            <!-- MOMENT 1: ANNIVERSARY -->
             <template x-if="activeProject.type === 'anniversary'">
               <div class="space-y-6 flex flex-col items-center">
                 <div class="relative w-28 h-28 flex items-center justify-center animate-float">
@@ -770,7 +779,7 @@
               </div>
             </template>
 
-            <!-- MOMEN 2: ULANG TAHUN -->
+            <!-- MOMENT 2: BIRTHDAY -->
             <template x-if="activeProject.type === 'birthday'">
               <div class="space-y-6 flex flex-col items-center">
                 <div class="relative w-28 h-28 flex items-center justify-center">
@@ -816,7 +825,7 @@
               </div>
             </template>
 
-            <!-- MOMEN 3: VALENTINE -->
+            <!-- MOMENT 3: VALENTINE -->
             <template x-if="activeProject.type === 'valentine'">
               <div class="space-y-6 flex flex-col items-center">
                 <div class="relative w-28 h-28 flex items-center justify-center animate-balloon">
@@ -865,7 +874,7 @@
           </div>
         </div>
 
-        <!-- ================= KARTU UTAMA DIBUKA (ISI LENGKAP) ================= -->
+        <!-- OPENED CARD -->
         <div x-show="isCardOpened" 
              :class="{
                'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-6 md:p-8': activeProject.theme === 'lovely',
@@ -881,7 +890,6 @@
             <span>[X]</span>
           </div>
 
-          <!-- Header Badge & Title -->
           <div class="space-y-2">
             <span x-show="activeProject.theme === 'lovely'" class="inline-block bg-pink-100 text-pink-700 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
               <span x-text="getBadgeText(activeProject.type)"></span>
@@ -932,7 +940,6 @@
 
             <div class="grid grid-cols-3 gap-2">
               
-              <!-- Years -->
               <div :class="{
                      'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
                      'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
@@ -950,7 +957,6 @@
                 <span class="text-[9px] font-semibold opacity-70 uppercase">Tahun</span>
               </div>
 
-              <!-- Months -->
               <div :class="{
                      'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
                      'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
@@ -968,7 +974,6 @@
                 <span class="text-[9px] font-semibold opacity-70 uppercase">Bulan</span>
               </div>
 
-              <!-- Days -->
               <div :class="{
                      'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
                      'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
