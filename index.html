@@ -1,0 +1,1556 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DearYou - Interactive Romantic Greeting</title>
+
+  <!-- Google Fonts Complete -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel:wght@600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=VT323&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'serif'],
+            cinzel: ['"Cinzel"', 'serif'],
+            hand: ['"Caveat"', 'cursive'],
+            mono: ['"Courier Prime"', 'monospace'],
+            pixel: ['"VT323"', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- External JS Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Custom Aesthetics & Animations -->
+  <style>
+    [x-cloak] { display: none !important; }
+
+    /* Moodboard Pattern */
+    .bg-moodboard-pattern {
+      background-color: #f3efe6;
+      background-image: radial-gradient(#d3c8b4 1.2px, transparent 1.2px);
+      background-size: 18px 18px;
+    }
+
+    /* Doodle Grid Paper */
+    .bg-doodle-grid {
+      background-size: 20px 20px;
+      background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+      background-color: #fcfbf7;
+    }
+
+    /* Tape Decor */
+    .washi-tape {
+      background: rgba(244, 114, 182, 0.35);
+      border-left: 2px dashed rgba(255, 255, 255, 0.8);
+      border-right: 2px dashed rgba(255, 255, 255, 0.8);
+    }
+
+    /* Ticket Notch Effect */
+    .ticket-stub {
+      background-image: radial-gradient(circle at 0 50%, transparent 8px, #fff 9px), 
+                        radial-gradient(circle at 100% 50%, transparent 8px, #fff 9px);
+    }
+
+    /* Shake Animation for Incorrect Input */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .animate-shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    /* Candle Flame Animation */
+    @keyframes candleFlame {
+      0%, 100% { transform: scale(1) rotate(-1deg); opacity: 0.9; }
+      50% { transform: scale(1.15) rotate(2deg); opacity: 1; filter: drop-shadow(0 0 8px #f59e0b); }
+    }
+    .animate-flame {
+      animation: candleFlame 1.2s infinite ease-in-out;
+      transform-origin: bottom center;
+    }
+
+    /* Floating Animations */
+    @keyframes floatUpSlow {
+      0% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(2deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+    .animate-float {
+      animation: floatUpSlow 3.5s ease-in-out infinite;
+    }
+
+    @keyframes floatUpBalloons {
+      0% { transform: translateY(12px) rotate(-3deg); }
+      50% { transform: translateY(-12px) rotate(4deg); }
+      100% { transform: translateY(12px) rotate(-3deg); }
+    }
+    .animate-balloon {
+      animation: floatUpBalloons 4s ease-in-out infinite;
+    }
+
+    /* Particle Falling Animation */
+    @keyframes particleFall {
+      0% { transform: translateY(-10px) rotate(0deg); opacity: 0.8; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0.1; }
+    }
+    .animate-particle {
+      animation: particleFall linear infinite;
+    }
+
+    /* Glow Blobs */
+    .blob-glow {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.4s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- Application Engine -->
+  <script>
+    function dearyouApp() {
+      return {
+        viewMode: 'dashboard',
+        dashboardTab: 'my',
+        isRecipientView: false,
+        isAudioPlaying: false,
+        activePhotoIndex: 0,
+        copiedToast: false,
+        toastMessage: '',
+        timerInterval: null,
+        isCardOpened: false,
+        inputPin: '',
+        isPinUnlocked: false,
+        pinError: false,
+        inputQuiz: '',
+        isQuizUnlocked: false,
+        quizError: false,
+        scratchRevealed: false,
+        nextEventCounter: { days: 0, hours: 0, minutes: 0, seconds: 0 },
+
+        counter: {
+          years: 0, months: 0, days: 0,
+          hours: 0, minutes: 0, seconds: 0,
+          totalDays: 0
+        },
+
+        activeProject: {
+          id: 'proj-1',
+          slug: 'love-1001',
+          type: 'anniversary',
+          theme: 'lovely',
+          title: 'Satu Tahun Bersamamu',
+          startDate: new Date().toISOString().slice(0, 16),
+          audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+          photos: [
+            'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
+          ],
+          message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari.',
+          pin: '',
+          quizQuestion: '',
+          quizAnswer: '',
+          nextEventTitle: 'Liburan Bareng',
+          nextEventDate: '',
+          scratchMessage: 'Kamu berhak dapat pelukan hangat kapan saja!',
+          particleEffect: 'petals',
+          vouchers: [
+            { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
+            { title: 'Voucher Traktir Coffee Shop', claimed: false },
+            { title: 'Voucher Nonton Bioskop', claimed: false }
+          ],
+          bucketList: [
+            { text: 'Nonton rekap foto kencan pertama', done: true },
+            { text: 'Piknik sore di taman', done: false },
+            { text: 'Thrift shopping bareng', done: false }
+          ]
+        },
+
+        get bucketProgress() {
+          if (!this.activeProject.bucketList || this.activeProject.bucketList.length === 0) return 0;
+          const done = this.activeProject.bucketList.filter(b => b.done).length;
+          return Math.round((done / this.activeProject.bucketList.length) * 100);
+        },
+
+        checkPin: function() {
+          if (this.inputPin === this.activeProject.pin) {
+            this.isPinUnlocked = true;
+            this.pinError = false;
+            this.triggerConfetti();
+            this.showToast('PIN Benar! Akses dibuka ✨');
+          } else {
+            this.pinError = true;
+            setTimeout(() => { this.pinError = false; }, 500);
+            this.showToast('PIN salah, coba lagi ya!');
+          }
+        },
+
+        checkQuiz: function() {
+          if (this.inputQuiz.toLowerCase().trim() === this.activeProject.quizAnswer.toLowerCase().trim()) {
+            this.isQuizUnlocked = true;
+            this.quizError = false;
+            this.triggerConfetti();
+            this.showToast('Jawaban Benar! 🎉');
+          } else {
+            this.quizError = true;
+            setTimeout(() => { this.quizError = false; }, 500);
+            this.showToast('Jawaban belum tepat, coba ingat-ingat lagi!');
+          }
+        },
+
+        claimVoucher: function(idx) {
+          this.activeProject.vouchers[idx].claimed = true;
+          this.triggerConfetti();
+          this.showToast('🎟️ Voucher berhasil diklaim!');
+        },
+
+        toggleBucket: function(idx) {
+          this.activeProject.bucketList[idx].done = !this.activeProject.bucketList[idx].done;
+          if (this.activeProject.bucketList[idx].done) {
+            this.triggerConfetti();
+          }
+        },
+
+        addVoucherField: function() {
+          if (!this.activeProject.vouchers) this.activeProject.vouchers = [];
+          this.activeProject.vouchers.push({ title: 'Voucher Baru', claimed: false });
+        },
+
+        removeVoucherField: function(idx) {
+          this.activeProject.vouchers.splice(idx, 1);
+        },
+
+        addBucketField: function() {
+          if (!this.activeProject.bucketList) this.activeProject.bucketList = [];
+          this.activeProject.bucketList.push({ text: 'Target Impian Baru', done: false });
+        },
+
+        removeBucketField: function(idx) {
+          this.activeProject.bucketList.splice(idx, 1);
+        },
+
+        updateNextEventCounter: function() {
+          if (!this.activeProject.nextEventDate) return;
+          var target = new Date(this.activeProject.nextEventDate).getTime();
+          var now = new Date().getTime();
+          var diff = target - now;
+
+          if (diff <= 0) {
+            this.nextEventCounter = { days: 0, hours: 0, minutes: 0, seconds: 0 };
+            return;
+          }
+
+          this.nextEventCounter = {
+            days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+            seconds: Math.floor((diff % (1000 * 60)) / 1000)
+          };
+        },
+
+        initScratchCard: function() {
+          this.scratchRevealed = false;
+          this.$nextTick(() => {
+            const canvas = document.getElementById('scratchCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.globalCompositeOperation = 'source-over';
+
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#475569';
+            ctx.font = 'bold 12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ GOSOK LAYAR DI SINI ✨', canvas.width / 2, canvas.height / 2 + 4);
+
+            let isDrawing = false;
+            let self = this;
+
+            const checkProgress = () => {
+              if (self.scratchRevealed) return;
+              const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              let transparent = 0;
+              for (let i = 3; i < imgData.data.length; i += 4) {
+                if (imgData.data[i] === 0) transparent++;
+              }
+              if (transparent / (imgData.data.length / 4) > 0.4) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                self.scratchRevealed = true;
+                self.triggerConfetti();
+                self.showToast('🎉 Hadiah Rahasia Terbuka!');
+              }
+            };
+
+            const scratch = (e) => {
+              if (!isDrawing || self.scratchRevealed) return;
+              const rect = canvas.getBoundingClientRect();
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+              
+              const scaleX = canvas.width / rect.width;
+              const scaleY = canvas.height / rect.height;
+              const x = (clientX - rect.left) * scaleX;
+              const y = (clientY - rect.top) * scaleY;
+              
+              ctx.globalCompositeOperation = 'destination-out';
+              ctx.beginPath();
+              ctx.arc(x, y, 22, 0, Math.PI * 2);
+              ctx.fill();
+              checkProgress();
+            };
+
+            canvas.onmousedown = () => isDrawing = true;
+            canvas.onmouseup = () => isDrawing = false;
+            canvas.onmouseleave = () => isDrawing = false;
+            canvas.onmousemove = scratch;
+            canvas.ontouchstart = (e) => { isDrawing = true; scratch(e); };
+            canvas.ontouchend = () => isDrawing = false;
+            canvas.ontouchmove = scratch;
+          });
+        },
+
+        exportToImage: function() {
+          const cardEl = document.getElementById('exportableCard');
+          if (!cardEl) return;
+          this.showToast('Sedang menyiapkan gambar...');
+          
+          html2canvas(cardEl, { 
+            scale: 2, 
+            useCORS: true,
+            ignoreElements: (el) => el.classList.contains('no-export')
+          }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = (this.activeProject.title || 'kartu-ucapan') + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            this.showToast('📷 Gambar berhasil diunduh ke Galeri!');
+          }).catch(() => {
+            this.showToast('Gagal mengunduh gambar.');
+          });
+        },
+
+        projects: [],
+
+        globalProjects: [
+          {
+            id: 'global-1',
+            slug: 'momen-indah-lovely',
+            type: 'anniversary',
+            theme: 'lovely',
+            title: 'Satu Tahun Bersamamu',
+            startDate: '2023-01-01T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari. Semoga perjalanan cinta kita terus berlanjut hingga nanti.',
+            scratchMessage: 'Hadiah Spesial: Traktir makan malam romantis minggu ini! ❤️',
+            particleEffect: 'petals',
+            vouchers: [
+              { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
+              { title: 'Voucher Traktir Coffee Shop', claimed: false }
+            ],
+            bucketList: [
+              { text: 'Jalan-jalan ke pantai bareng', done: true },
+              { text: 'Masak makan malam berdua', done: false }
+            ]
+          },
+          {
+            id: 'global-2',
+            slug: 'memory-pin-moodboard',
+            type: 'anniversary',
+            theme: 'moodboard',
+            title: 'Koleksi Cerita Kita',
+            startDate: '2022-11-10T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Setiap lembar kenangan bersamamu selalu tersimpan rapi. Terima kasih telah menemani setiap langkah dan perjalanan ini.'
+          },
+          {
+            id: 'global-3',
+            slug: 'ultah-retro-surprise',
+            type: 'birthday',
+            theme: 'retro',
+            title: 'Selamat Ulang Tahun Sayang!',
+            startDate: '1998-05-20T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Selamat ulang tahun untuk orang paling spesial! Semoga semua impian dan harapanmu tercapai di tahun ini.',
+            scratchMessage: 'Bonus: Tiket bebas pilih film favorit di bioskop!',
+            particleEffect: 'fireworks'
+          },
+          {
+            id: 'global-4',
+            slug: 'vintage-love-letter',
+            type: 'anniversary',
+            theme: 'vintage',
+            title: 'Surat Cinta Klasik',
+            startDate: '2021-08-17T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Waktu berlalu begitu cepat, tetapi ketahuilah bahwa perasaan ini tidak pernah pudar sedikit pun oleh waktu.',
+            particleEffect: 'stars'
+          },
+          {
+            id: 'global-5',
+            slug: 'valentine-doodle-journal',
+            type: 'valentine',
+            theme: 'doodle',
+            title: 'Happy Valentine\'s Day',
+            startDate: '2024-02-14T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Hari kasih sayang jadi lebih bermakna karena ada kamu di hidupku. Terima kasih selalu ada!',
+            particleEffect: 'petals'
+          },
+          {
+            id: 'global-6',
+            slug: 'lovely-birthday-special',
+            type: 'birthday',
+            theme: 'lovely',
+            title: 'Momen Bahagia Ulang Tahun',
+            startDate: '2000-12-25T00:00',
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: 'Nikmati hari spesialmu ini dengan senyuman terbaik. Terima kasih sudah hadir membuat dunia lebih indah.',
+            scratchMessage: 'Kado Rahasia: Pelukan hangat 24/7!'
+          }
+        ],
+
+        get displayedProjects() {
+          return this.dashboardTab === 'global' ? this.globalProjects : this.projects;
+        },
+
+        initApp: function() {
+          var saved = localStorage.getItem('dearyou_projects_db');
+          if (saved) {
+            try { this.projects = JSON.parse(saved); } catch(e) { this.projects = []; }
+          }
+          if (!this.projects || this.projects.length === 0) {
+            this.projects = [ JSON.parse(JSON.stringify(this.activeProject)) ];
+            this.saveToStorage();
+          }
+
+          var urlParams = new URLSearchParams(window.location.search);
+          var dataParam = urlParams.get('data');
+          var slugParam = urlParams.get('slug');
+
+          if (dataParam) {
+            try {
+              var decodedJson = decodeURIComponent(atob(dataParam));
+              var parsedCard = JSON.parse(decodedJson);
+              this.activeProject = parsedCard;
+              this.viewMode = 'public';
+              this.isRecipientView = true;
+              this.isCardOpened = false;
+              this.startLiveCounter();
+              return;
+            } catch(e) {
+              console.error("Gagal membaca data dari link", e);
+            }
+          }
+
+          if (slugParam) {
+            var found = null;
+            var allProjects = this.projects.concat(this.globalProjects);
+            for (var i = 0; i < allProjects.length; i++) {
+              if (allProjects[i].slug === slugParam) {
+                found = allProjects[i];
+                break;
+              }
+            }
+            if (found) {
+              this.activeProject = JSON.parse(JSON.stringify(found));
+            }
+            this.viewMode = 'public';
+            this.isRecipientView = true;
+            this.isCardOpened = false;
+            this.startLiveCounter();
+          }
+        },
+
+        openCardInteractive: function() {
+          this.isCardOpened = true;
+          this.triggerConfetti();
+          this.initScratchCard();
+          
+          var audioEl = document.getElementById('bgAudio');
+          if (audioEl && this.activeProject.audioUrl) {
+            var self = this;
+            audioEl.play().then(function() {
+              self.isAudioPlaying = true;
+            }).catch(function() {});
+          }
+        },
+
+        saveToStorage: function() {
+          localStorage.setItem('dearyou_projects_db', JSON.stringify(this.projects));
+        },
+
+        showToast: function(msg) {
+          this.toastMessage = msg;
+          this.copiedToast = true;
+          var self = this;
+          setTimeout(function() { self.copiedToast = false; }, 3200);
+        },
+
+        createNewProject: function(type) {
+          this.activeProject = {
+            id: 'proj-' + Date.now(),
+            slug: 'love-' + Math.floor(1000 + Math.random() * 9000),
+            type: type || 'anniversary',
+            theme: 'lovely',
+            title: '',
+            startDate: new Date().toISOString().slice(0, 16),
+            audioUrl: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3',
+            photos: [
+              'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
+            ],
+            message: '',
+            pin: '',
+            quizQuestion: '',
+            quizAnswer: '',
+            nextEventTitle: '',
+            nextEventDate: '',
+            scratchMessage: 'Kamu berhak dapat pelukan hangat dan es krim!',
+            particleEffect: 'petals',
+            vouchers: [
+              { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
+              { title: 'Voucher Traktir Coffee Shop', claimed: false }
+            ],
+            bucketList: [
+              { text: 'Liburan bareng ke pantai', done: false }
+            ]
+          };
+          this.viewMode = 'editor';
+        },
+
+        editProject: function(proj) {
+          this.activeProject = JSON.parse(JSON.stringify(proj));
+          this.viewMode = 'editor';
+        },
+
+        saveProject: function() {
+          if (!this.activeProject.title || !this.activeProject.message) {
+            this.showToast('⚠️ Mohon isi judul ucapan dan pesan!');
+            return;
+          }
+
+          var idx = -1;
+          for (var i = 0; i < this.projects.length; i++) {
+            if (this.projects[i].id === this.activeProject.id) {
+              idx = i;
+              break;
+            }
+          }
+
+          if (idx !== -1) {
+            this.projects[idx] = JSON.parse(JSON.stringify(this.activeProject));
+          } else {
+            this.projects.unshift(JSON.parse(JSON.stringify(this.activeProject)));
+          }
+
+          this.saveToStorage();
+          this.showToast('Kartu ucapan berhasil disimpan.');
+          this.dashboardTab = 'my';
+          this.viewMode = 'dashboard';
+        },
+
+        deleteProject: function(id) {
+          if (confirm('Apakah Anda yakin ingin menghapus kartu ucapan ini?')) {
+            var filtered = [];
+            for (var i = 0; i < this.projects.length; i++) {
+              if (this.projects[i].id !== id) filtered.push(this.projects[i]);
+            }
+            this.projects = filtered;
+            this.saveToStorage();
+            this.showToast('Kartu berhasil dihapus.');
+          }
+        },
+
+        openPreview: function(proj) {
+          this.activeProject = JSON.parse(JSON.stringify(proj));
+          this.isPinUnlocked = !this.activeProject.pin;
+          this.isQuizUnlocked = !this.activeProject.quizQuestion;
+          this.inputPin = '';
+          this.inputQuiz = '';
+          this.viewMode = 'public';
+          this.isRecipientView = false;
+          this.isCardOpened = false;
+          this.activePhotoIndex = 0;
+          this.startLiveCounter();
+        },
+
+        copyShareLink: function(proj) {
+          var target = proj || this.activeProject;
+          try {
+            var jsonStr = JSON.stringify(target);
+            var encodedData = btoa(encodeURIComponent(jsonStr));
+            var shareUrl = window.location.origin + window.location.pathname + '?data=' + encodedData;
+
+            if (navigator.clipboard && window.isSecureContext) {
+              navigator.clipboard.writeText(shareUrl);
+            } else {
+              prompt('Salin link ucapan berikut:', shareUrl);
+            }
+            this.showToast('Link ucapan berhasil disalin!');
+          } catch (e) {
+            this.showToast('Gagal membuat link tautan.');
+          }
+        },
+
+        addPhotoField: function() {
+          if (!this.activeProject.photos) this.activeProject.photos = [];
+          this.activeProject.photos.push('https://images.unsplash.com/photo-1522673607200-164d1b6ce486?auto=format&fit=crop&q=80&w=800');
+        },
+
+        removePhotoField: function(idx) {
+          if (this.activeProject.photos.length > 1) {
+            this.activeProject.photos.splice(idx, 1);
+          } else {
+            this.showToast('Minimal harus menyertakan 1 foto.');
+          }
+        },
+
+        toggleAudio: function() {
+          var audioEl = document.getElementById('bgAudio');
+          if (!audioEl || !this.activeProject.audioUrl) {
+            this.showToast('Belum ada tautan musik yang diisi.');
+            return;
+          }
+
+          if (this.isAudioPlaying) {
+            audioEl.pause();
+            this.isAudioPlaying = false;
+          } else {
+            var self = this;
+            audioEl.play().then(function() {
+              self.isAudioPlaying = true;
+            }).catch(function() {
+              self.showToast('Sentuh layar sekali lagi untuk memutar musik.');
+            });
+          }
+        },
+
+        triggerConfetti: function() {
+          if (typeof confetti === 'function') {
+            confetti({
+              particleCount: 80,
+              spread: 80,
+              origin: { y: 0.6 },
+              colors: ['#f43f5e', '#ec4899', '#d946ef', '#eab308', '#ffffff']
+            });
+
+            setTimeout(function() {
+              confetti({
+                particleCount: 50,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#f43f5e', '#ec4899', '#a855f7']
+              });
+              confetti({
+                particleCount: 50,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#f43f5e', '#ec4899', '#eab308']
+              });
+            }, 250);
+          }
+        },
+
+        startLiveCounter: function() {
+          if (this.timerInterval) clearInterval(this.timerInterval);
+          var self = this;
+          this.updateCounter();
+          this.updateNextEventCounter();
+          this.timerInterval = setInterval(function() {
+            self.updateCounter();
+            self.updateNextEventCounter();
+          }, 1000);
+        },
+
+        updateCounter: function() {
+          if (!this.activeProject.startDate) return;
+          var start = new Date(this.activeProject.startDate);
+          var now = new Date();
+
+          if (isNaN(start.getTime())) return;
+
+          var diffMs = now - start;
+          if (diffMs < 0) diffMs = 0;
+
+          var totalDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+          var years = now.getFullYear() - start.getFullYear();
+          var months = now.getMonth() - start.getMonth();
+          var days = now.getDate() - start.getDate();
+
+          if (days < 0) { months--; days += 30; }
+          if (months < 0) { years--; months += 12; }
+
+          var hours = now.getHours() - start.getHours();
+          var minutes = now.getMinutes() - start.getMinutes();
+          var seconds = now.getSeconds() - start.getSeconds();
+
+          if (seconds < 0) { seconds += 60; minutes--; }
+          if (minutes < 0) { minutes += 60; hours--; }
+          if (hours < 0) { hours += 24; }
+
+          this.counter = {
+            years: Math.max(0, years),
+            months: Math.max(0, months),
+            days: Math.max(0, days),
+            hours: Math.max(0, hours),
+            minutes: Math.max(0, minutes),
+            seconds: Math.max(0, seconds),
+            totalDays: totalDays
+          };
+        },
+
+        getBadgeText: function(type) {
+          if (type === 'birthday') return 'Happy Birthday';
+          if (type === 'valentine') return 'Happy Valentine';
+          return 'Happy Anniversary';
+        }
+      };
+    }
+  </script>
+</head>
+<body class="antialiased min-h-screen flex flex-col font-sans relative bg-slate-50 selection:bg-rose-200 selection:text-rose-800">
+
+  <!-- Glow Blobs -->
+  <div class="blob-glow w-80 h-80 bg-pink-200 top-10 -left-20"></div>
+  <div class="blob-glow w-96 h-96 bg-purple-200 bottom-10 -right-20"></div>
+
+  <!-- APP ROOT -->
+  <div x-data="dearyouApp()" x-init="initApp()" class="flex-1 flex flex-col min-h-screen relative z-10" x-cloak>
+
+    <!-- HEADER NAVIGATION -->
+    <header x-show="viewMode !== 'public'" class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
+      <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-2 cursor-pointer" @click="viewMode = 'dashboard'">
+          <span class="text-xl font-bold font-serif text-slate-900 tracking-tight">DearYou</span>
+        </div>
+
+        <button x-show="viewMode === 'dashboard'" @click="createNewProject('anniversary')" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all active:scale-95">
+          + Buat Kartu Baru
+        </button>
+
+        <button x-show="viewMode === 'editor'" @click="viewMode = 'dashboard'" class="text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors">
+          Kembali ke Dashboard
+        </button>
+      </div>
+    </header>
+
+    <!-- TOAST NOTIFICATION -->
+    <div x-show="copiedToast" x-transition.opacity class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700">
+      <span class="text-xs font-medium" x-text="toastMessage"></span>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
+
+      <!-- ================= 1. DASHBOARD VIEW ================= -->
+      <div x-show="viewMode === 'dashboard'" class="space-y-6 animate-fade-in">
+
+        <!-- Hero Card -->
+        <div class="bg-slate-900 rounded-3xl p-6 md:p-10 text-white shadow-xl relative overflow-hidden">
+          <div class="relative z-10 max-w-md space-y-3">
+            <span class="inline-block bg-white/10 text-rose-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-white/10">
+              Personalized Greeting App
+            </span>
+            <h2 class="text-2xl md:text-3xl font-serif font-bold text-white leading-tight">Kejutkan Pasangan Anda dengan Kartu Ucapan Digital</h2>
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed">Lengkap dengan hitungan detik bersama, galeri foto, kuis kenangan, kupon cinta, dan efek interaktif.</p>
+
+            <div class="pt-2 flex flex-wrap gap-2">
+              <button @click="createNewProject('anniversary')" class="bg-white text-slate-900 font-bold px-4 py-2 rounded-xl text-xs hover:bg-slate-100 transition-all active:scale-95">
+                Anniversary
+              </button>
+              <button @click="createNewProject('birthday')" class="bg-white/15 hover:bg-white/25 text-white font-bold px-4 py-2 rounded-xl text-xs backdrop-blur-md transition-all active:scale-95 border border-white/15">
+                Ulang Tahun
+              </button>
+              <button @click="createNewProject('valentine')" class="bg-white/15 hover:bg-white/25 text-white font-bold px-4 py-2 rounded-xl text-xs backdrop-blur-md transition-all active:scale-95 border border-white/15">
+                Valentine
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Header + Tab Switcher -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+          <div class="flex items-center gap-3">
+            <h3 class="font-serif font-bold text-lg text-slate-800">Koleksi Kartu Ucapan</h3>
+            <span class="text-xs text-slate-400 font-medium" x-text="displayedProjects.length + (dashboardTab === 'my' ? ' Kartu Tersimpan' : ' Kartu Publik')"></span>
+          </div>
+
+          <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-semibold self-start sm:self-auto">
+            <button @click="dashboardTab = 'my'" 
+                    :class="dashboardTab === 'my' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
+                    class="px-3.5 py-1.5 rounded-lg transition-all">
+              Milik Saya
+            </button>
+            <button @click="dashboardTab = 'global'" 
+                    :class="dashboardTab === 'global' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
+                    class="px-3.5 py-1.5 rounded-lg transition-all">
+              Hasil Global
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <template x-for="p in displayedProjects" :key="p.id">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4">
+              <div>
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-[10px] font-bold tracking-wider text-slate-700 uppercase bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200" x-text="getBadgeText(p.type)"></span>
+                  <span class="text-[10px] font-semibold text-slate-400 capitalize" x-text="'Tema: ' + p.theme"></span>
+                </div>
+
+                <h4 class="font-serif font-bold text-slate-800 text-lg mt-3" x-text="p.title || 'Tanpa Judul'"></h4>
+                <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed" x-text="p.message"></p>
+              </div>
+
+              <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                <button @click="copyShareLink(p)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
+                  Salin Link
+                </button>
+                <button @click="openPreview(p)" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">
+                  Buka Kartu
+                </button>
+                <button x-show="dashboardTab === 'my'" @click="editProject(p)" class="p-2 text-slate-400 hover:text-slate-700 text-xs" title="Edit">Edit</button>
+                <button x-show="dashboardTab === 'my'" @click="deleteProject(p.id)" class="p-2 text-slate-400 hover:text-rose-600 text-xs" title="Hapus">Hapus</button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- ================= 2. EDITOR VIEW ================= -->
+      <div x-show="viewMode === 'editor'" class="max-w-2xl mx-auto bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl space-y-6 animate-fade-in">
+        <div class="border-b border-slate-100 pb-3">
+          <h2 class="text-xl font-serif font-bold text-slate-800">Edit Kartu Ucapan</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Atur momen, tema, kuis, voucher, dan fitur interaktif lainnya.</p>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700">1. Pilihan Momen Spesial</label>
+          <select x-model="activeProject.type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium">
+            <option value="anniversary">Happy Anniversary / Jadian</option>
+            <option value="birthday">Happy Birthday / Ulang Tahun</option>
+            <option value="valentine">Happy Valentine / Hari Kasih Sayang</option>
+          </select>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-xs font-bold text-slate-700">2. Pilih Tampilan Tema (Gaya Moodboard Collage)</label>
+            <span class="text-[10px] text-slate-400">Klik salah satu swatch</span>
+          </div>
+
+          <div class="bg-moodboard-pattern p-4 md:p-6 rounded-2xl border border-stone-300 relative overflow-hidden shadow-inner">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
+              
+              <button @click="activeProject.theme = 'lovely'" 
+                      :class="activeProject.theme === 'lovely' ? 'ring-4 ring-rose-500 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
+                      class="bg-gradient-to-br from-pink-100 to-rose-200 p-4 rounded-2xl border border-pink-300 text-left transition-all -rotate-2 shadow-md relative">
+                <div class="washi-tape absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4"></div>
+                <span class="block text-[10px] font-bold text-pink-600 uppercase tracking-wider">Theme 01</span>
+                <span class="block font-serif text-sm font-bold text-slate-800 mt-1">Lovely Glass</span>
+                <span class="block text-[9px] text-pink-700 mt-1 leading-tight">Pink lembut, glassmorphism, & font serif romantis.</span>
+              </button>
+
+              <button @click="activeProject.theme = 'moodboard'" 
+                      :class="activeProject.theme === 'moodboard' ? 'ring-4 ring-slate-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
+                      class="bg-white p-4 rounded-none border border-slate-300 text-left transition-all rotate-2 shadow-md relative">
+                <div class="w-2.5 h-2.5 rounded-full bg-rose-500 absolute -top-1 left-3 shadow-sm"></div>
+                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Theme 02</span>
+                <span class="block font-sans text-sm font-black text-slate-900 mt-1">Moodboard Pin</span>
+                <span class="block text-[9px] text-slate-500 mt-1 leading-tight">Kolase foto, paper clip, & kertas memo terpisah.</span>
+              </button>
+
+              <button @click="activeProject.theme = 'retro'" 
+                      :class="activeProject.theme === 'retro' ? 'ring-4 ring-cyan-400 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
+                      class="bg-slate-900 p-4 rounded-none border-2 border-cyan-400 text-left transition-all -rotate-1 shadow-md relative">
+                <span class="block text-[10px] font-pixel text-cyan-300 uppercase tracking-widest">Theme 03</span>
+                <span class="block font-pixel text-lg text-pink-400 leading-tight">Y2K RETRO 90S</span>
+                <span class="block text-[9px] text-slate-300 mt-1 leading-tight">Jendela OS klasik, font piksel, & warna neon.</span>
+              </button>
+
+              <button @click="activeProject.theme = 'vintage'" 
+                      :class="activeProject.theme === 'vintage' ? 'ring-4 ring-amber-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
+                      class="bg-[#e8decb] p-4 rounded-none border border-amber-900/30 text-left transition-all rotate-3 shadow-md relative">
+                <div class="w-6 h-6 border-2 border-dashed border-amber-800/40 absolute top-2 right-2 text-[8px] flex items-center justify-center font-mono">STAMP</div>
+                <span class="block text-[10px] font-mono text-amber-900 uppercase">Theme 04</span>
+                <span class="block font-mono font-bold text-sm text-stone-900 mt-1">Vintage Paper</span>
+                <span class="block text-[9px] text-amber-900/80 mt-1 leading-tight">Kertas kraft tua, mesin ketik, & stempel pos.</span>
+              </button>
+
+              <button @click="activeProject.theme = 'doodle'" 
+                      :class="activeProject.theme === 'doodle' ? 'ring-4 ring-purple-600 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
+                      class="bg-doodle-grid p-4 rounded-lg border-2 border-slate-800 text-left transition-all -rotate-2 shadow-md relative">
+                <span class="block text-[10px] font-hand font-bold text-purple-700">Theme 05</span>
+                <span class="block font-hand text-xl font-bold text-slate-900 leading-tight">Journal Doodle</span>
+                <span class="block text-[9px] text-slate-600 mt-1 leading-tight">Sketsa kertas kotak, font cakar ayam, & orat-aret.</span>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700">Judul Ucapan</label>
+          <input type="text" x-model="activeProject.title" placeholder="Contoh: Happy 1st Anniversary My Love" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700">Tanggal Momen / Tanggal Jadian</label>
+          <input type="datetime-local" x-model="activeProject.startDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+        </div>
+
+        <!-- FITUR PRIVASI & KUIS -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🔒 Personalisasi & Kuis Keamanan</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Proteksi PIN (4 Digit / Opsional)</label>
+              <input type="password" maxlength="4" x-model="activeProject.pin" placeholder="Misal: 1211" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Jawaban Kuis Romantis</label>
+              <input type="text" x-model="activeProject.quizAnswer" placeholder="Misal: Cafe Monokrom" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-semibold text-slate-700">Pertanyaan Kuis Romantis (Opsional)</label>
+            <input type="text" x-model="activeProject.quizQuestion" placeholder="Contoh: Di mana tempat pertama kali kita kencan?" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+          </div>
+        </div>
+
+        <!-- MUSIK & PARTIKEL -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🎵 Musik & Visual Particles</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-bold text-slate-700">Link Musik Background (.mp3)</label>
+              <input type="text" x-model="activeProject.audioUrl" placeholder="https://..." class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+            </div>
+
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Efek Partikel Visual</label>
+              <select x-model="activeProject.particleEffect" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800">
+                <option value="petals">Kelopak Bunga Gugur 🌸</option>
+                <option value="fireworks">Kembang Api ✨</option>
+                <option value="stars">Bintang Menyala ⭐</option>
+                <option value="none">Tanpa Efek Partikel</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- FOTO POLAROID -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-slate-700">Daftar Link Foto Polaroid</label>
+            <button @click="addPhotoField()" class="text-xs font-bold text-slate-900 hover:underline">+ Tambah Foto</button>
+          </div>
+          <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+            <div class="flex gap-2 mb-2">
+              <input type="text" x-model="activeProject.photos[idx]" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-slate-800 font-medium" />
+              <button @click="removePhotoField(idx)" class="bg-slate-100 text-slate-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200">Hapus</button>
+            </div>
+          </template>
+        </div>
+
+        <!-- PESAN & GOSOK HADIAH -->
+        <div>
+          <label class="text-xs font-bold text-slate-700">Pesan Romantis / Surat Cinta</label>
+          <textarea x-model="activeProject.message" rows="4" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 leading-relaxed font-medium"></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-bold text-slate-700">Pesan Rahasia Scratch Card (Kartu Gosok)</label>
+          <input type="text" x-model="activeProject.scratchMessage" placeholder="Misal: Kamu berhak dapat pelukan hangat dan es krim!" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+        </div>
+
+        <!-- COUNTDOWN EVENT -->
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">⏳ Countdown Event Mendatang</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Nama Acara / Event</label>
+              <input type="text" x-model="activeProject.nextEventTitle" placeholder="Misal: Liburan Bali" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+            <div>
+              <label class="text-xs font-semibold text-slate-700">Tanggal Acara</label>
+              <input type="datetime-local" x-model="activeProject.nextEventDate" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            </div>
+          </div>
+        </div>
+
+        <!-- KUPON CINTA & BUCKET LIST -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Vouchers -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🎟️ Kupon Cinta Custom</h3>
+              <button @click="addVoucherField()" class="text-[10px] font-bold text-slate-900 hover:underline">+ Tambah</button>
+            </div>
+            <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+              <div class="flex gap-2 mb-2">
+                <input type="text" x-model="activeProject.vouchers[idx].title" class="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-xs" />
+                <button @click="removeVoucherField(idx)" class="text-rose-500 font-bold text-xs px-2">✕</button>
+              </div>
+            </template>
+          </div>
+
+          <!-- Bucket List -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Future Bucket List</h3>
+              <button @click="addBucketField()" class="text-[10px] font-bold text-slate-900 hover:underline">+ Tambah</button>
+            </div>
+            <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+              <div class="flex gap-2 mb-2">
+                <input type="text" x-model="activeProject.bucketList[idx].text" class="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-xs" />
+                <button @click="removeBucketField(idx)" class="text-rose-500 font-bold text-xs px-2">✕</button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-3">
+          <button @click="saveProject()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs transition-all active:scale-95 shadow-md">
+            Simpan Kartu
+          </button>
+          <button @click="openPreview(activeProject)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-5 py-3.5 rounded-xl text-xs transition-all active:scale-95">
+            Preview
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= 3. PUBLIC VIEW & ANIMATED OPENING SCREEN ================= -->
+      <div x-show="viewMode === 'public'" 
+           :class="{
+             'bg-gradient-to-br from-pink-100 via-rose-50 to-pink-200 text-slate-800': activeProject.theme === 'lovely',
+             'bg-moodboard-pattern text-slate-900': activeProject.theme === 'moodboard',
+             'bg-slate-950 text-cyan-300': activeProject.theme === 'retro',
+             'bg-[#f0e7d5] text-stone-900': activeProject.theme === 'vintage',
+             'bg-doodle-grid text-slate-900': activeProject.theme === 'doodle'
+           }" 
+           class="min-h-[92vh] flex flex-col items-center justify-center p-3 md:p-6 relative transition-all duration-500 animate-fade-in rounded-3xl overflow-hidden">
+        
+        <audio id="bgAudio" :src="activeProject.audioUrl" loop></audio>
+
+        <!-- VISUAL PARTICLES BACKGROUND -->
+        <template x-if="activeProject.particleEffect && activeProject.particleEffect !== 'none'">
+          <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 no-export">
+            <template x-for="n in 16" :key="n">
+              <div class="absolute animate-particle text-xl select-none"
+                   :style="`left: ${Math.random() * 100}%; animation-duration: ${3 + Math.random() * 5}s; animation-delay: ${Math.random() * 4}s; opacity: ${0.4 + Math.random() * 0.6};`"
+                   x-text="activeProject.particleEffect === 'petals' ? '🌸' : (activeProject.particleEffect === 'fireworks' ? '✨' : '⭐')">
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <!-- FLOATING CONTROLS (AUDIO & DASHBOARD) -->
+        <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40 no-export">
+          <button @click="viewMode = 'dashboard'" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all">
+            Dashboard
+          </button>
+        </div>
+
+        <div class="fixed top-4 right-4 z-40 flex flex-wrap justify-end gap-2 no-export">
+          <button @click="toggleAudio()" class="bg-white/90 backdrop-blur-md text-slate-800 px-3.5 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full" :class="isAudioPlaying ? 'bg-rose-500 animate-ping' : 'bg-slate-300'"></span>
+            <span x-text="isAudioPlaying ? '🎵 Musik On' : '🎵 Musik Off'"></span>
+          </button>
+        </div>
+
+        <!-- STEP 1: PROTEKSI PIN (JIKA ADA PIN & BELUM DIUNLOCK) -->
+        <div x-show="activeProject.pin && !isPinUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-10">
+          <div :class="{ 'animate-shake border-rose-400': pinError }" class="bg-white/90 backdrop-blur-xl border border-slate-200 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
+            <div class="w-14 h-14 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">🔒</div>
+            <h3 class="font-bold text-slate-800 text-base">Kartu Dilindungi PIN</h3>
+            <p class="text-xs text-slate-500">Masukkan 4 digit PIN / Tanggal Spesial untuk membuka pesan rahasia ini.</p>
+            
+            <input type="password" maxlength="4" x-model="inputPin" @keyup.enter="checkPin()" placeholder="****" class="w-full text-center text-2xl tracking-widest bg-slate-50 border border-slate-300 rounded-2xl p-3 focus:outline-none focus:border-rose-500 font-mono shadow-inner" />
+            
+            <button @click="checkPin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md">
+              Buka Kunci PIN
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2: KUIS ROMANTIS (JIKA ADA KUIS & BELUM DIUNLOCK) -->
+        <div x-show="isPinUnlocked && activeProject.quizQuestion && !isQuizUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-10">
+          <div :class="{ 'animate-shake border-rose-400': quizError }" class="bg-white/90 backdrop-blur-xl border border-slate-200 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
+            <div class="w-14 h-14 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">❓</div>
+            <h3 class="font-bold text-slate-800 text-base">Kuis Uji Kenangan</h3>
+            <p class="text-xs text-rose-600 font-semibold bg-rose-50 p-3 rounded-xl border border-rose-100 leading-relaxed" x-text="activeProject.quizQuestion"></p>
+            
+            <input type="text" x-model="inputQuiz" @keyup.enter="checkQuiz()" placeholder="Tulis jawabanmu di sini..." class="w-full text-center bg-slate-50 border border-slate-300 rounded-2xl p-3 text-xs focus:outline-none focus:border-rose-500 font-medium shadow-inner" />
+            
+            <button @click="checkQuiz()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md">
+              Jawab & Buka Kartu
+            </button>
+          </div>
+        </div>
+
+        <!-- UNOPENED CARD -->
+        <div x-show="(isPinUnlocked || !activeProject.pin) && (isQuizUnlocked || !activeProject.quizQuestion) && !isCardOpened" class="w-full max-w-md my-auto animate-fade-in relative z-10">
+          
+          <div :class="{
+                 'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-8 text-center': activeProject.theme === 'lovely',
+                 'bg-white border-2 border-slate-800 shadow-xl rounded-none p-8 text-center relative': activeProject.theme === 'moodboard',
+                 'bg-slate-900 border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] rounded-none p-8 text-center': activeProject.theme === 'retro',
+                 'bg-[#fdfaf3] border border-amber-900/40 shadow-2xl rounded-none p-8 text-center relative': activeProject.theme === 'vintage',
+                 'bg-white border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-8 text-center': activeProject.theme === 'doodle'
+               }">
+
+            <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-4 -mx-4 mb-6">
+              <span>SPECIAL_PRESENT.EXE</span>
+              <span>[X]</span>
+            </div>
+            <div x-show="activeProject.theme === 'moodboard'" class="washi-tape absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5"></div>
+            <div x-show="activeProject.theme === 'vintage'" class="w-8 h-8 border-2 border-dashed border-amber-800/40 absolute top-3 right-3 text-[9px] flex items-center justify-center font-mono">GIFT</div>
+
+            <!-- MOMENT 1: ANNIVERSARY -->
+            <template x-if="activeProject.type === 'anniversary'">
+              <div class="space-y-6 flex flex-col items-center">
+                <div class="relative w-28 h-28 flex items-center justify-center animate-float">
+                  <svg class="w-8 h-8 text-rose-500 absolute -top-2 -left-2 animate-ping" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <svg class="w-10 h-10 text-pink-400 absolute -bottom-1 -right-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                  <svg class="w-24 h-24 text-amber-800 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-4 8c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2H8v-2z"/>
+                  </svg>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span :class="{
+                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
+                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase tracking-widest block">Special Anniversary Gift</span>
+                  
+                  <h3 :class="{
+                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
+                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Ada Kotak Cokelat & Pesan Untukmu</h3>
+                  
+                  <p class="text-xs opacity-70">Sentuh tombol di bawah untuk membuka ucapan.</p>
+                </div>
+
+                <button @click="openCardInteractive()" 
+                        :class="{
+                          'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-lg shadow-pink-200 hover:from-pink-600 hover:to-rose-600': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
+                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
+                        }" 
+                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                  Buka Cokelat & Kartu
+                </button>
+              </div>
+            </template>
+
+            <!-- MOMENT 2: BIRTHDAY -->
+            <template x-if="activeProject.type === 'birthday'">
+              <div class="space-y-6 flex flex-col items-center">
+                <div class="relative w-28 h-28 flex items-center justify-center">
+                  <svg class="w-8 h-10 text-amber-500 absolute -top-3 -left-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                  <svg class="w-8 h-10 text-purple-500 absolute -top-2 -right-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+                  <div class="w-3 h-5 bg-amber-400 rounded-full absolute -top-1 animate-flame z-20"></div>
+                  <svg class="w-24 h-24 text-rose-500 drop-shadow-xl z-10" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 6a1 1 0 0 1 1 1v1h-2V7a1 1 0 0 1 1-1zm9 7v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 2H5v5h14v-5z"/>
+                  </svg>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span :class="{
+                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
+                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase tracking-widest block">Happy Birthday Surprise</span>
+                  
+                  <h3 :class="{
+                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
+                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Selamat Ulang Tahun!</h3>
+                  
+                  <p class="text-xs opacity-70">Tiup lilinnya & buka kartu di dalamnya.</p>
+                </div>
+
+                <button @click="openCardInteractive()" 
+                        :class="{
+                          'bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-xl shadow-lg hover:from-amber-600 hover:to-rose-600': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
+                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
+                        }" 
+                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                  Tiup Lilin & Buka Kartu
+                </button>
+              </div>
+            </template>
+
+            <!-- MOMENT 3: VALENTINE -->
+            <template x-if="activeProject.type === 'valentine'">
+              <div class="space-y-6 flex flex-col items-center">
+                <div class="relative w-28 h-28 flex items-center justify-center animate-balloon">
+                  <svg class="w-20 h-24 text-rose-500 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                  <svg class="w-12 h-14 text-pink-400 absolute top-0 -right-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </div>
+
+                <div class="space-y-1.5">
+                  <span :class="{
+                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
+                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase tracking-widest block">Happy Valentine's Day</span>
+                  
+                  <h3 :class="{
+                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
+                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Ada Surat Cinta Spesial</h3>
+                  
+                  <p class="text-xs opacity-70">Sentuh untuk membuka kartu ucapan Valentine.</p>
+                </div>
+
+                <button @click="openCardInteractive()" 
+                        :class="{
+                          'bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-xl shadow-lg hover:from-pink-600 hover:to-rose-700': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
+                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
+                        }" 
+                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                  Buka Kartu Valentine
+                </button>
+              </div>
+            </template>
+
+          </div>
+        </div>
+
+        <!-- OPENED CARD -->
+        <div x-show="isCardOpened" id="exportableCard" 
+             :class="{
+               'bg-white/90 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-6 md:p-8': activeProject.theme === 'lovely',
+               'bg-white border border-stone-300 shadow-xl rounded-none p-6 md:p-8 relative': activeProject.theme === 'moodboard',
+               'bg-slate-900 border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] rounded-none p-6 md:p-8': activeProject.theme === 'retro',
+               'bg-[#fdfaf3] border border-amber-900/30 shadow-2xl rounded-none p-6 md:p-8 relative': activeProject.theme === 'vintage',
+               'bg-doodle-grid border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-6 md:p-8': activeProject.theme === 'doodle'
+             }" 
+             class="max-w-md w-full my-8 space-y-6 text-center transition-all duration-300 relative z-10">
+
+          <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-2 -mx-2 mb-4">
+            <span>DEARYOU_CARD.EXE</span>
+            <span>[X]</span>
+          </div>
+
+          <div class="space-y-2">
+            <span x-show="activeProject.theme === 'lovely'" class="inline-block bg-pink-100 text-pink-700 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
+              <span x-text="getBadgeText(activeProject.type)"></span>
+            </span>
+
+            <span x-show="activeProject.theme === 'moodboard'" class="inline-block bg-slate-900 text-white text-[10px] font-bold px-3 py-1 rounded-none uppercase tracking-widest">
+              <span x-text="getBadgeText(activeProject.type)"></span>
+            </span>
+
+            <span x-show="activeProject.theme === 'retro'" class="inline-block bg-pink-500 text-white font-pixel text-sm px-3 py-0.5 uppercase tracking-widest">
+              <span x-text="getBadgeText(activeProject.type)"></span>
+            </span>
+
+            <span x-show="activeProject.theme === 'vintage'" class="inline-block border border-dashed border-amber-900/40 text-amber-900 font-mono text-xs px-3 py-1 uppercase">
+              <span x-text="getBadgeText(activeProject.type)"></span>
+            </span>
+
+            <span x-show="activeProject.theme === 'doodle'" class="inline-block bg-amber-100 border-2 border-slate-900 text-slate-900 font-hand text-lg px-3 py-0.5 -rotate-2">
+              <span x-text="getBadgeText(activeProject.type)"></span>
+            </span>
+
+            <h1 :class="{
+                   'font-serif text-2xl md:text-3xl font-bold text-slate-800 mt-2': activeProject.theme === 'lovely',
+                   'font-sans text-xl md:text-2xl font-black text-slate-900 mt-2': activeProject.theme === 'moodboard',
+                   'font-pixel text-2xl md:text-3xl text-pink-400 mt-2 tracking-wide': activeProject.theme === 'retro',
+                   'font-mono text-xl md:text-2xl font-bold text-stone-900 mt-2': activeProject.theme === 'vintage',
+                   'font-hand text-3xl md:text-4xl font-bold text-slate-900 mt-1': activeProject.theme === 'doodle'
+                 }" 
+                x-text="activeProject.title"></h1>
+          </div>
+
+          <!-- Counter Container -->
+          <div :class="{
+                 'bg-pink-50/60 border border-pink-100 rounded-2xl p-4 shadow-inner': activeProject.theme === 'lovely',
+                 'bg-slate-100 border border-slate-200 rounded-none p-4': activeProject.theme === 'moodboard',
+                 'bg-slate-950 border border-cyan-400/40 rounded-none p-4': activeProject.theme === 'retro',
+                 'bg-[#f4ebd9] border border-amber-900/20 rounded-none p-4': activeProject.theme === 'vintage',
+                 'bg-white border-2 border-slate-900 rounded-none p-4': activeProject.theme === 'doodle'
+               }">
+            
+            <p :class="{
+                 'text-pink-600 text-[10px] font-bold uppercase tracking-wider': activeProject.theme === 'lovely',
+                 'text-slate-700 text-[10px] font-bold uppercase tracking-widest': activeProject.theme === 'moodboard',
+                 'text-cyan-300 font-pixel text-xs tracking-widest': activeProject.theme === 'retro',
+                 'text-amber-900 font-mono text-[10px] uppercase': activeProject.theme === 'vintage',
+                 'text-slate-800 font-hand text-base font-bold': activeProject.theme === 'doodle'
+               }" class="mb-3">Telah Bersama Selama</p>
+
+            <div class="grid grid-cols-3 gap-2">
+              
+              <div :class="{
+                     'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
+                     'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
+                     'bg-slate-900 border border-pink-500 rounded-none p-2': activeProject.theme === 'retro',
+                     'bg-[#fdfdfb] border border-stone-300 rounded-none p-2': activeProject.theme === 'vintage',
+                     'bg-amber-50 border-2 border-slate-900 rounded-none p-2': activeProject.theme === 'doodle'
+                   }">
+                <span :class="{
+                        'text-pink-600 font-serif text-2xl font-bold': activeProject.theme === 'lovely',
+                        'text-slate-900 font-sans text-2xl font-black': activeProject.theme === 'moodboard',
+                        'text-pink-400 font-pixel text-2xl': activeProject.theme === 'retro',
+                        'text-stone-900 font-mono text-xl font-bold': activeProject.theme === 'vintage',
+                        'text-slate-900 font-hand text-3xl font-bold': activeProject.theme === 'doodle'
+                      }" class="block" x-text="counter.years"></span>
+                <span class="text-[9px] font-semibold opacity-70 uppercase">Tahun</span>
+              </div>
+
+              <div :class="{
+                     'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
+                     'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
+                     'bg-slate-900 border border-pink-500 rounded-none p-2': activeProject.theme === 'retro',
+                     'bg-[#fdfdfb] border border-stone-300 rounded-none p-2': activeProject.theme === 'vintage',
+                     'bg-amber-50 border-2 border-slate-900 rounded-none p-2': activeProject.theme === 'doodle'
+                   }">
+                <span :class="{
+                        'text-pink-600 font-serif text-2xl font-bold': activeProject.theme === 'lovely',
+                        'text-slate-900 font-sans text-2xl font-black': activeProject.theme === 'moodboard',
+                        'text-pink-400 font-pixel text-2xl': activeProject.theme === 'retro',
+                        'text-stone-900 font-mono text-xl font-bold': activeProject.theme === 'vintage',
+                        'text-slate-900 font-hand text-3xl font-bold': activeProject.theme === 'doodle'
+                      }" class="block" x-text="counter.months"></span>
+                <span class="text-[9px] font-semibold opacity-70 uppercase">Bulan</span>
+              </div>
+
+              <div :class="{
+                     'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
+                     'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
+                     'bg-slate-900 border border-pink-500 rounded-none p-2': activeProject.theme === 'retro',
+                     'bg-[#fdfdfb] border border-stone-300 rounded-none p-2': activeProject.theme === 'vintage',
+                     'bg-amber-50 border-2 border-slate-900 rounded-none p-2': activeProject.theme === 'doodle'
+                   }">
+                <span :class="{
+                        'text-pink-600 font-serif text-2xl font-bold': activeProject.theme === 'lovely',
+                        'text-slate-900 font-sans text-2xl font-black': activeProject.theme === 'moodboard',
+                        'text-pink-400 font-pixel text-2xl': activeProject.theme === 'retro',
+                        'text-stone-900 font-mono text-xl font-bold': activeProject.theme === 'vintage',
+                        'text-slate-900 font-hand text-3xl font-bold': activeProject.theme === 'doodle'
+                      }" class="block" x-text="counter.days"></span>
+                <span class="text-[9px] font-semibold opacity-70 uppercase">Hari</span>
+              </div>
+
+            </div>
+
+            <div class="mt-3 text-[11px] opacity-80 font-mono flex justify-center gap-2">
+              <span x-text="counter.hours + ' jam'"></span> •
+              <span x-text="counter.minutes + ' menit'"></span> •
+              <span x-text="counter.seconds + ' detik'"></span>
+            </div>
+          </div>
+
+          <!-- Photo Gallery -->
+          <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
+            <div class="relative overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 aspect-[4/3] shadow-inner">
+              <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover transition-all duration-300 hover:scale-105" alt="Moment Photo" />
+            </div>
+            
+            <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
+              <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                <button @click="activePhotoIndex = idx" 
+                        :class="activePhotoIndex === idx ? 'ring-2 ring-rose-500 scale-105 shadow-md' : 'opacity-60 hover:opacity-100'" 
+                        class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 transition-all">
+                  <img :src="photo" class="w-full h-full object-cover" />
+                </button>
+              </template>
+            </div>
+          </div>
+
+          <!-- Romantic Message -->
+          <div :class="{
+                 'bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-pink-100 shadow-sm text-left': activeProject.theme === 'lovely',
+                 'bg-amber-50/80 border border-stone-300 rounded-none p-5 text-left relative': activeProject.theme === 'moodboard',
+                 'bg-slate-950 border border-cyan-400/50 rounded-none p-5 text-left font-pixel': activeProject.theme === 'retro',
+                 'bg-[#fdfdfb] border border-stone-300 rounded-none p-5 text-left font-mono': activeProject.theme === 'vintage',
+                 'bg-white border-2 border-slate-900 rounded-none p-5 text-left font-hand': activeProject.theme === 'doodle'
+               }">
+            <p :class="{
+                 'font-serif text-sm leading-relaxed text-slate-700 whitespace-pre-line': activeProject.theme === 'lovely',
+                 'font-sans text-xs leading-relaxed text-slate-800 whitespace-pre-line': activeProject.theme === 'moodboard',
+                 'font-pixel text-sm leading-relaxed text-cyan-200 whitespace-pre-line': activeProject.theme === 'retro',
+                 'font-mono text-xs leading-relaxed text-stone-800 whitespace-pre-line': activeProject.theme === 'vintage',
+                 'font-hand text-lg leading-relaxed text-slate-900 whitespace-pre-line': activeProject.theme === 'doodle'
+               }" x-text="activeProject.message"></p>
+          </div>
+
+          <!-- 1. GOSOK HADIAH (SCRATCH CARD) -->
+          <div x-show="activeProject.scratchMessage" class="bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200 rounded-2xl p-4 text-center space-y-2 shadow-sm">
+            <span class="text-xs font-bold text-rose-700 uppercase tracking-wider block">✨ Gosok Hadiah Rahasia ✨</span>
+            <div class="relative w-full max-w-[240px] h-20 mx-auto rounded-xl overflow-hidden border border-rose-200 bg-white flex items-center justify-center p-3 text-center shadow-inner">
+              <p class="text-xs font-bold text-rose-900 leading-tight" x-text="activeProject.scratchMessage"></p>
+              <canvas id="scratchCanvas" width="240" height="80" class="absolute inset-0 cursor-pointer touch-none z-10 transition-opacity duration-300"></canvas>
+            </div>
+          </div>
+
+          <!-- 2. COUNTDOWN EVENT MENDATANG -->
+          <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-slate-900 text-white rounded-2xl p-4 space-y-3 shadow-lg">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold text-rose-300 uppercase tracking-widest" x-text="'⏳ Event: ' + activeProject.nextEventTitle"></span>
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2 text-center">
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.days"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Hari</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.hours"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Jam</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.minutes"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Menit</span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.seconds"></span>
+                <span class="text-[8px] uppercase tracking-wider opacity-70">Detik</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. VOUCHER / KUPON CINTA CUSTOM -->
+          <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-3 text-left">
+            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider text-center">🎟️ Voucher Cinta Spesial</h3>
+            <div class="space-y-2.5">
+              <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                <div class="ticket-stub bg-white border border-rose-200 rounded-xl p-3.5 flex items-center justify-between shadow-sm relative overflow-hidden transition-all hover:shadow-md">
+                  <div class="pr-2 space-y-0.5">
+                    <p class="font-bold text-xs text-slate-800" x-text="v.title"></p>
+                    <span class="text-[9px] font-semibold text-rose-500 block" x-text="v.claimed ? '✓ Voucher Telah Diklaim' : '• Masa Berlaku: Kapan Saja'"></span>
+                  </div>
+                  
+                  <button @click="claimVoucher(idx)" :disabled="v.claimed"
+                          :class="v.claimed ? 'bg-emerald-500 text-white cursor-default' : 'bg-rose-500 hover:bg-rose-600 text-white active:scale-95 shadow-md shadow-rose-200'"
+                          class="px-3.5 py-2 rounded-xl text-[11px] font-bold transition-all shrink-0">
+                    <span x-text="v.claimed ? 'TERKLAIM' : 'Klaim'"></span>
+                  </button>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- 4. FUTURE BUCKET LIST -->
+          <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-3 text-left">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Target Impian Bersama</h3>
+              <span class="text-[10px] font-bold text-rose-500" x-text="bucketProgress + '% Terwujud'"></span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+              <div class="bg-gradient-to-r from-pink-500 to-rose-500 h-full transition-all duration-500 rounded-full" :style="`width: ${bucketProgress}%`"></div>
+            </div>
+
+            <div class="bg-white/80 border border-slate-200 rounded-2xl p-3.5 space-y-2 shadow-sm">
+              <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                <label @click="toggleBucket(idx)" class="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-colors">
+                  <input type="checkbox" :checked="b.done" class="w-4 h-4 accent-rose-500 rounded cursor-pointer transition-transform active:scale-125" />
+                  <span class="text-xs font-medium text-slate-700 transition-all" :class="{ 'line-through text-slate-400 font-normal': b.done }" x-text="b.text"></span>
+                </label>
+              </template>
+            </div>
+          </div>
+
+          <!-- 5. TOMBOL EKSPOR GAMBAR PNG -->
+          <div class="pt-4 border-t border-slate-200/60 no-export">
+            <button @click="exportToImage()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
+              <span>📷 Simpan Kartu Ucapan (.PNG)</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+</body>
+</html>
