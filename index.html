@@ -8,7 +8,7 @@
   <!-- Google Fonts Complete -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel:wght@600;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel:wght@600;700;800&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=VT323&display=swap" rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -34,101 +34,112 @@
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- Custom Aesthetics & Animations -->
+  <!-- Custom Visual Themes & High-End Animations -->
   <style>
     [x-cloak] { display: none !important; }
 
-    /* Moodboard Pattern */
-    .bg-moodboard-pattern {
-      background-color: #f3efe6;
-      background-image: radial-gradient(#d3c8b4 1.2px, transparent 1.2px);
-      background-size: 18px 18px;
-    }
-
-    /* Doodle Grid Paper */
-    .bg-doodle-grid {
-      background-size: 20px 20px;
-      background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-      background-color: #fcfbf7;
-    }
-
-    /* Tape Decor */
-    .washi-tape {
-      background: rgba(244, 114, 182, 0.35);
-      border-left: 2px dashed rgba(255, 255, 255, 0.8);
-      border-right: 2px dashed rgba(255, 255, 255, 0.8);
-    }
-
-    /* Ticket Notch Effect */
-    .ticket-stub {
-      background-image: radial-gradient(circle at 0 50%, transparent 8px, #fff 9px), 
-                        radial-gradient(circle at 100% 50%, transparent 8px, #fff 9px);
-    }
-
-    /* Shake Animation for Incorrect Input */
+    /* Keyframe Animations */
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
       20%, 60% { transform: translateX(-8px); }
       40%, 80% { transform: translateX(8px); }
     }
-    .animate-shake {
-      animation: shake 0.4s ease-in-out;
-    }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
 
-    /* Candle Flame Animation */
     @keyframes candleFlame {
-      0%, 100% { transform: scale(1) rotate(-1deg); opacity: 0.9; }
-      50% { transform: scale(1.15) rotate(2deg); opacity: 1; filter: drop-shadow(0 0 8px #f59e0b); }
+      0%, 100% { transform: scale(1) rotate(-1deg); filter: drop-shadow(0 0 6px #f59e0b); }
+      50% { transform: scale(1.18) rotate(3deg); filter: drop-shadow(0 0 14px #ef4444); }
     }
-    .animate-flame {
-      animation: candleFlame 1.2s infinite ease-in-out;
-      transform-origin: bottom center;
+    .animate-flame { animation: candleFlame 1.2s infinite ease-in-out; transform-origin: bottom center; }
+
+    @keyframes floatGlass {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(1.5deg); }
+    }
+    .animate-float-glass { animation: floatGlass 4.5s ease-in-out infinite; }
+
+    @keyframes paperWiggle {
+      0%, 100% { transform: rotate(-1deg); }
+      50% { transform: rotate(1deg); }
+    }
+    .animate-paper-wiggle { animation: paperWiggle 6s ease-in-out infinite; }
+
+    @keyframes crtScanline {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 100%; }
+    }
+    .bg-crt-overlay {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.05), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.05));
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
     }
 
-    /* Floating Animations */
-    @keyframes floatUpSlow {
-      0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(2deg); }
-      100% { transform: translateY(0px) rotate(0deg); }
+    @keyframes neonPulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(34, 211, 238, 0.4), inset 0 0 15px rgba(34, 211, 238, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(244, 63, 94, 0.7), inset 0 0 25px rgba(244, 63, 94, 0.3); }
     }
-    .animate-float {
-      animation: floatUpSlow 3.5s ease-in-out infinite;
+    .animate-neon-pulse { animation: neonPulse 3s infinite ease-in-out; }
+
+    @keyframes shimmerMove {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+    .animate-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .animate-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+      animation: shimmerMove 3s infinite;
     }
 
-    @keyframes floatUpBalloons {
-      0% { transform: translateY(12px) rotate(-3deg); }
-      50% { transform: translateY(-12px) rotate(4deg); }
-      100% { transform: translateY(12px) rotate(-3deg); }
-    }
-    .animate-balloon {
-      animation: floatUpBalloons 4s ease-in-out infinite;
+    /* Patterns & Accents */
+    .bg-moodboard-pattern {
+      background-color: #e5dec9;
+      background-image: radial-gradient(#b8ad94 1.5px, transparent 1.5px);
+      background-size: 20px 20px;
     }
 
-    /* Particle Falling Animation */
-    @keyframes particleFall {
-      0% { transform: translateY(-10px) rotate(0deg); opacity: 0.8; }
-      100% { transform: translateY(100vh) rotate(360deg); opacity: 0.1; }
-    }
-    .animate-particle {
-      animation: particleFall linear infinite;
+    .bg-doodle-grid {
+      background-size: 24px 24px;
+      background-image: linear-gradient(to right, rgba(15, 23, 42, 0.08) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(15, 23, 42, 0.08) 1px, transparent 1px);
+      background-color: #faf8f2;
     }
 
-    /* Glow Blobs */
+    .washi-tape-pink {
+      background: rgba(244, 114, 182, 0.45);
+      border-left: 3px dashed rgba(255, 255, 255, 0.8);
+      border-right: 3px dashed rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    }
+
+    .washi-tape-amber {
+      background: rgba(217, 119, 6, 0.35);
+      border-left: 3px dashed rgba(255, 255, 255, 0.8);
+      border-right: 3px dashed rgba(255, 255, 255, 0.8);
+    }
+
+    .ticket-stub {
+      background-image: radial-gradient(circle at 0 50%, transparent 9px, #fff 10px), 
+                        radial-gradient(circle at 100% 50%, transparent 9px, #fff 10px);
+    }
+
     .blob-glow {
       position: fixed;
       border-radius: 50%;
-      filter: blur(100px);
+      filter: blur(120px);
       pointer-events: none;
       z-index: 0;
-      opacity: 0.4;
+      opacity: 0.5;
     }
 
-    .animate-fade-in {
-      animation: fadeIn 0.4s ease-out;
-    }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px); }
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
@@ -145,6 +156,7 @@
         copiedToast: false,
         toastMessage: '',
         timerInterval: null,
+        particleAnimFrame: null,
         isCardOpened: false,
         inputPin: '',
         isPinUnlocked: false,
@@ -203,7 +215,7 @@
             this.isPinUnlocked = true;
             this.pinError = false;
             this.triggerConfetti();
-            this.showToast('PIN Benar! Akses dibuka ✨');
+            this.showToast('PIN Benar! Akses dibuka');
           } else {
             this.pinError = true;
             setTimeout(() => { this.pinError = false; }, 500);
@@ -216,7 +228,7 @@
             this.isQuizUnlocked = true;
             this.quizError = false;
             this.triggerConfetti();
-            this.showToast('Jawaban Benar! 🎉');
+            this.showToast('Jawaban Benar!');
           } else {
             this.quizError = true;
             setTimeout(() => { this.quizError = false; }, 500);
@@ -227,7 +239,7 @@
         claimVoucher: function(idx) {
           this.activeProject.vouchers[idx].claimed = true;
           this.triggerConfetti();
-          this.showToast('🎟️ Voucher berhasil diklaim!');
+          this.showToast('Voucher berhasil diklaim!');
         },
 
         toggleBucket: function(idx) {
@@ -274,6 +286,124 @@
           };
         },
 
+        // Real-time Smooth Canvas Particle Engine (Replacing Emojis)
+        startCanvasParticles: function() {
+          if (this.particleAnimFrame) cancelAnimationFrame(this.particleAnimFrame);
+          this.$nextTick(() => {
+            const canvas = document.getElementById('canvasParticles');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            const resize = () => {
+              canvas.width = window.innerWidth;
+              canvas.height = window.innerHeight;
+            };
+            resize();
+            window.removeEventListener('resize', resize);
+            window.addEventListener('resize', resize);
+
+            const effect = this.activeProject.particleEffect || 'petals';
+            if (effect === 'none') {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              return;
+            }
+
+            const count = effect === 'fireworks' ? 50 : 40;
+            let particles = [];
+
+            for (let i = 0; i < count; i++) {
+              particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 8 + 4,
+                speedY: Math.random() * 1.2 + 0.6,
+                speedX: (Math.random() - 0.5) * 0.8,
+                angle: Math.random() * Math.PI * 2,
+                angularSpeed: (Math.random() - 0.5) * 0.04,
+                opacity: Math.random() * 0.7 + 0.3,
+                color: effect === 'petals' 
+                  ? ['#f472b6', '#fb7185', '#fda4af', '#e11d48'][Math.floor(Math.random()*4)]
+                  : effect === 'fireworks'
+                  ? ['#f59e0b', '#ef4444', '#3b82f6', '#ec4899', '#10b981', '#facc15'][Math.floor(Math.random()*6)]
+                  : ['#fef08a', '#ffffff', '#e0e7ff', '#fcd34d'][Math.floor(Math.random()*4)]
+              });
+            }
+
+            const self = this;
+            const render = () => {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+              particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.opacity;
+
+                if (effect === 'petals') {
+                  p.y += p.speedY;
+                  p.x += Math.sin(p.y * 0.015) * 0.9 + p.speedX;
+                  p.angle += p.angularSpeed;
+
+                  if (p.y > canvas.height + 20) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                  }
+
+                  ctx.translate(p.x, p.y);
+                  ctx.rotate(p.angle);
+                  ctx.fillStyle = p.color;
+                  ctx.beginPath();
+                  ctx.moveTo(0, 0);
+                  ctx.bezierCurveTo(-p.size, -p.size, -p.size * 1.4, p.size, 0, p.size * 1.6);
+                  ctx.bezierCurveTo(p.size * 1.4, p.size, p.size, -p.size, 0, 0);
+                  ctx.fill();
+
+                } else if (effect === 'stars') {
+                  p.opacity += Math.sin(Date.now() * 0.003 + p.x) * 0.012;
+                  p.opacity = Math.max(0.15, Math.min(0.95, p.opacity));
+                  p.angle += 0.005;
+
+                  ctx.translate(p.x, p.y);
+                  ctx.rotate(p.angle);
+                  ctx.fillStyle = p.color;
+                  ctx.shadowBlur = 10;
+                  ctx.shadowColor = p.color;
+
+                  ctx.beginPath();
+                  for (let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos((18 + i * 72) * Math.PI / 180) * p.size, -Math.sin((18 + i * 72) * Math.PI / 180) * p.size);
+                    ctx.lineTo(Math.cos((54 + i * 72) * Math.PI / 180) * (p.size / 2.2), -Math.sin((54 + i * 72) * Math.PI / 180) * (p.size / 2.2));
+                  }
+                  ctx.closePath();
+                  ctx.fill();
+
+                } else if (effect === 'fireworks') {
+                  p.y -= p.speedY * 0.9;
+                  p.x += Math.cos(p.y * 0.02) * 0.6;
+                  p.opacity -= 0.004;
+
+                  if (p.y < -20 || p.opacity <= 0) {
+                    p.y = canvas.height + 20;
+                    p.x = Math.random() * canvas.width;
+                    p.opacity = Math.random() * 0.7 + 0.3;
+                  }
+
+                  ctx.translate(p.x, p.y);
+                  ctx.fillStyle = p.color;
+                  ctx.shadowBlur = 12;
+                  ctx.shadowColor = p.color;
+                  ctx.beginPath();
+                  ctx.arc(0, 0, p.size * 0.5, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+
+                ctx.restore();
+              });
+
+              self.particleAnimFrame = requestAnimationFrame(render);
+            };
+            render();
+          });
+        },
+
         initScratchCard: function() {
           this.scratchRevealed = false;
           this.$nextTick(() => {
@@ -283,13 +413,13 @@
             
             ctx.globalCompositeOperation = 'source-over';
 
-            ctx.fillStyle = '#cbd5e1';
+            ctx.fillStyle = this.activeProject.theme === 'retro' ? '#0f172a' : (this.activeProject.theme === 'vintage' ? '#d7c4a3' : '#cbd5e1');
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            ctx.fillStyle = '#475569';
+            ctx.fillStyle = this.activeProject.theme === 'retro' ? '#22d3ee' : (this.activeProject.theme === 'vintage' ? '#451a03' : '#475569');
             ctx.font = 'bold 12px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('✨ GOSOK LAYAR DI SINI ✨', canvas.width / 2, canvas.height / 2 + 4);
+            ctx.fillText('GOSOK LAYAR DI SINI', canvas.width / 2, canvas.height / 2 + 4);
 
             let isDrawing = false;
             let self = this;
@@ -305,7 +435,7 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 self.scratchRevealed = true;
                 self.triggerConfetti();
-                self.showToast('🎉 Hadiah Rahasia Terbuka!');
+                self.showToast('Hadiah Rahasia Terbuka!');
               }
             };
 
@@ -351,7 +481,7 @@
             link.download = (this.activeProject.title || 'kartu-ucapan') + '.png';
             link.href = canvas.toDataURL('image/png');
             link.click();
-            this.showToast('📷 Gambar berhasil diunduh ke Galeri!');
+            this.showToast('Gambar berhasil diunduh ke Galeri!');
           }).catch(() => {
             this.showToast('Gagal mengunduh gambar.');
           });
@@ -372,7 +502,7 @@
               'https://images.unsplash.com/photo-1518199266791-5375a83190b7?auto=format&fit=crop&q=80&w=800'
             ],
             message: 'Terima kasih sudah menjadi alasan tersenyum setiap hari. Semoga perjalanan cinta kita terus berlanjut hingga nanti.',
-            scratchMessage: 'Hadiah Spesial: Traktir makan malam romantis minggu ini! ❤️',
+            scratchMessage: 'Hadiah Spesial: Traktir makan malam romantis minggu ini!',
             particleEffect: 'petals',
             vouchers: [
               { title: 'Voucher Bebas Marah 1 Hari', claimed: false },
@@ -482,6 +612,7 @@
               this.isRecipientView = true;
               this.isCardOpened = false;
               this.startLiveCounter();
+              this.startCanvasParticles();
               return;
             } catch(e) {
               console.error("Gagal membaca data dari link", e);
@@ -504,6 +635,7 @@
             this.isRecipientView = true;
             this.isCardOpened = false;
             this.startLiveCounter();
+            this.startCanvasParticles();
           }
         },
 
@@ -570,7 +702,7 @@
 
         saveProject: function() {
           if (!this.activeProject.title || !this.activeProject.message) {
-            this.showToast('⚠️ Mohon isi judul ucapan dan pesan!');
+            this.showToast('Mohon isi judul ucapan dan pesan!');
             return;
           }
 
@@ -617,6 +749,7 @@
           this.isCardOpened = false;
           this.activePhotoIndex = 0;
           this.startLiveCounter();
+          this.startCanvasParticles();
         },
 
         copyShareLink: function(proj) {
@@ -756,60 +889,64 @@
     }
   </script>
 </head>
-<body class="antialiased min-h-screen flex flex-col font-sans relative bg-slate-50 selection:bg-rose-200 selection:text-rose-800">
+<body class="antialiased min-h-screen flex flex-col font-sans relative bg-slate-900 selection:bg-rose-500 selection:text-white overflow-x-hidden">
 
-  <!-- Glow Blobs -->
-  <div class="blob-glow w-80 h-80 bg-pink-200 top-10 -left-20"></div>
-  <div class="blob-glow w-96 h-96 bg-purple-200 bottom-10 -right-20"></div>
+  <!-- Glow Background Orbs -->
+  <div class="blob-glow w-96 h-96 bg-rose-500/30 top-10 -left-20"></div>
+  <div class="blob-glow w-[30rem] h-[30rem] bg-indigo-500/20 bottom-10 -right-20"></div>
 
   <!-- APP ROOT -->
   <div x-data="dearyouApp()" x-init="initApp()" class="flex-1 flex flex-col min-h-screen relative z-10" x-cloak>
 
     <!-- HEADER NAVIGATION -->
-    <header x-show="viewMode !== 'public'" class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
-      <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+    <header x-show="viewMode !== 'public'" class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <div class="flex items-center gap-2 cursor-pointer" @click="viewMode = 'dashboard'">
-          <span class="text-xl font-bold font-serif text-slate-900 tracking-tight">DearYou</span>
+          <span class="text-xl font-bold font-serif text-white tracking-tight">DearYou</span>
+          <span class="bg-rose-500/20 text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-500/30">PRO</span>
         </div>
 
-        <button x-show="viewMode === 'dashboard'" @click="createNewProject('anniversary')" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-all active:scale-95">
-          + Buat Kartu Baru
+        <button x-show="viewMode === 'dashboard'" @click="createNewProject('anniversary')" class="bg-rose-600 hover:bg-rose-500 text-white px-5 py-2 rounded-xl text-xs font-semibold shadow-lg shadow-rose-900/30 transition-all active:scale-95 flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Buat Kartu Baru
         </button>
 
-        <button x-show="viewMode === 'editor'" @click="viewMode = 'dashboard'" class="text-slate-500 hover:text-slate-800 text-xs font-semibold transition-colors">
+        <button x-show="viewMode === 'editor'" @click="viewMode = 'dashboard'" class="text-slate-400 hover:text-white text-xs font-semibold transition-colors flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           Kembali ke Dashboard
         </button>
       </div>
     </header>
 
     <!-- TOAST NOTIFICATION -->
-    <div x-show="copiedToast" x-transition.opacity class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 border border-slate-700">
+    <div x-show="copiedToast" x-transition.opacity class="fixed bottom-6 right-6 z-50 bg-slate-950 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-slate-800 backdrop-blur-md">
+      <svg class="w-4 h-4 text-rose-400 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
       <span class="text-xs font-medium" x-text="toastMessage"></span>
     </div>
 
     <!-- MAIN CONTENT -->
-    <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
+    <main class="flex-1 w-full mx-auto" :class="viewMode === 'public' ? 'p-0' : 'p-4 md:p-6 max-w-6xl'">
 
       <!-- ================= 1. DASHBOARD VIEW ================= -->
-      <div x-show="viewMode === 'dashboard'" class="space-y-6 animate-fade-in">
+      <div x-show="viewMode === 'dashboard'" class="space-y-6 animate-fade-in max-w-4xl mx-auto">
 
         <!-- Hero Card -->
-        <div class="bg-slate-900 rounded-3xl p-6 md:p-10 text-white shadow-xl relative overflow-hidden">
-          <div class="relative z-10 max-w-md space-y-3">
-            <span class="inline-block bg-white/10 text-rose-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-white/10">
-              Personalized Greeting App
+        <div class="bg-gradient-to-r from-slate-900 via-rose-950/60 to-slate-900 border border-slate-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl relative overflow-hidden">
+          <div class="relative z-10 max-w-lg space-y-3">
+            <span class="inline-block bg-rose-500/10 text-rose-300 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest border border-rose-500/20">
+              Interactive Card Creator
             </span>
-            <h2 class="text-2xl md:text-3xl font-serif font-bold text-white leading-tight">Kejutkan Pasangan Anda dengan Kartu Ucapan Digital</h2>
-            <p class="text-slate-300 text-xs md:text-sm leading-relaxed">Lengkap dengan hitungan detik bersama, galeri foto, kuis kenangan, kupon cinta, dan efek interaktif.</p>
+            <h2 class="text-2xl md:text-3xl font-serif font-bold text-white leading-tight">Buat Kejutan Digital yang Unik & Penuh Animasi</h2>
+            <p class="text-slate-300 text-xs md:text-sm leading-relaxed">Dilengkapi penghitung detik realtime, galeri interaktif, proteksi PIN, kuis kenangan, voucher custom, dan efek partikel visual.</p>
 
-            <div class="pt-2 flex flex-wrap gap-2">
-              <button @click="createNewProject('anniversary')" class="bg-white text-slate-900 font-bold px-4 py-2 rounded-xl text-xs hover:bg-slate-100 transition-all active:scale-95">
+            <div class="pt-2 flex flex-wrap gap-2.5">
+              <button @click="createNewProject('anniversary')" class="bg-white text-slate-950 font-bold px-4 py-2 rounded-xl text-xs hover:bg-slate-100 transition-all active:scale-95 shadow-md">
                 Anniversary
               </button>
-              <button @click="createNewProject('birthday')" class="bg-white/15 hover:bg-white/25 text-white font-bold px-4 py-2 rounded-xl text-xs backdrop-blur-md transition-all active:scale-95 border border-white/15">
+              <button @click="createNewProject('birthday')" class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2 rounded-xl text-xs backdrop-blur-md transition-all active:scale-95 border border-white/10">
                 Ulang Tahun
               </button>
-              <button @click="createNewProject('valentine')" class="bg-white/15 hover:bg-white/25 text-white font-bold px-4 py-2 rounded-xl text-xs backdrop-blur-md transition-all active:scale-95 border border-white/15">
+              <button @click="createNewProject('valentine')" class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2 rounded-xl text-xs backdrop-blur-md transition-all active:scale-95 border border-white/10">
                 Valentine
               </button>
             </div>
@@ -819,18 +956,18 @@
         <!-- Header + Tab Switcher -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
           <div class="flex items-center gap-3">
-            <h3 class="font-serif font-bold text-lg text-slate-800">Koleksi Kartu Ucapan</h3>
+            <h3 class="font-serif font-bold text-lg text-white">Koleksi Kartu Ucapan</h3>
             <span class="text-xs text-slate-400 font-medium" x-text="displayedProjects.length + (dashboardTab === 'my' ? ' Kartu Tersimpan' : ' Kartu Publik')"></span>
           </div>
 
-          <div class="inline-flex p-1 bg-slate-200/80 rounded-xl text-xs font-semibold self-start sm:self-auto">
+          <div class="inline-flex p-1 bg-slate-800 rounded-xl text-xs font-semibold self-start sm:self-auto border border-slate-700">
             <button @click="dashboardTab = 'my'" 
-                    :class="dashboardTab === 'my' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
+                    :class="dashboardTab === 'my' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'" 
                     class="px-3.5 py-1.5 rounded-lg transition-all">
               Milik Saya
             </button>
             <button @click="dashboardTab = 'global'" 
-                    :class="dashboardTab === 'global' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'" 
+                    :class="dashboardTab === 'global' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'" 
                     class="px-3.5 py-1.5 rounded-lg transition-all">
               Hasil Global
             </button>
@@ -840,26 +977,26 @@
         <!-- Grid Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <template x-for="p in displayedProjects" :key="p.id">
-            <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between space-y-4">
+            <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-md hover:border-slate-700 transition-all flex flex-col justify-between space-y-4">
               <div>
                 <div class="flex items-center justify-between gap-2">
-                  <span class="text-[10px] font-bold tracking-wider text-slate-700 uppercase bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200" x-text="getBadgeText(p.type)"></span>
+                  <span class="text-[10px] font-bold tracking-wider text-rose-300 uppercase bg-rose-500/10 px-2.5 py-1 rounded-md border border-rose-500/20" x-text="getBadgeText(p.type)"></span>
                   <span class="text-[10px] font-semibold text-slate-400 capitalize" x-text="'Tema: ' + p.theme"></span>
                 </div>
 
-                <h4 class="font-serif font-bold text-slate-800 text-lg mt-3" x-text="p.title || 'Tanpa Judul'"></h4>
-                <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed" x-text="p.message"></p>
+                <h4 class="font-serif font-bold text-white text-lg mt-3" x-text="p.title || 'Tanpa Judul'"></h4>
+                <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed" x-text="p.message"></p>
               </div>
 
-              <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
-                <button @click="copyShareLink(p)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
+              <div class="pt-3 border-t border-slate-800 flex items-center gap-2">
+                <button @click="copyShareLink(p)" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold py-2.5 rounded-xl transition-all active:scale-95">
                   Salin Link
                 </button>
-                <button @click="openPreview(p)" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">
+                <button @click="openPreview(p)" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">
                   Buka Kartu
                 </button>
-                <button x-show="dashboardTab === 'my'" @click="editProject(p)" class="p-2 text-slate-400 hover:text-slate-700 text-xs" title="Edit">Edit</button>
-                <button x-show="dashboardTab === 'my'" @click="deleteProject(p.id)" class="p-2 text-slate-400 hover:text-rose-600 text-xs" title="Hapus">Hapus</button>
+                <button x-show="dashboardTab === 'my'" @click="editProject(p)" class="p-2 text-slate-400 hover:text-white text-xs" title="Edit">Edit</button>
+                <button x-show="dashboardTab === 'my'" @click="deleteProject(p.id)" class="p-2 text-slate-400 hover:text-rose-400 text-xs" title="Hapus">Hapus</button>
               </div>
             </div>
           </template>
@@ -867,15 +1004,15 @@
       </div>
 
       <!-- ================= 2. EDITOR VIEW ================= -->
-      <div x-show="viewMode === 'editor'" class="max-w-2xl mx-auto bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl space-y-6 animate-fade-in">
-        <div class="border-b border-slate-100 pb-3">
-          <h2 class="text-xl font-serif font-bold text-slate-800">Edit Kartu Ucapan</h2>
-          <p class="text-xs text-slate-400 mt-0.5">Atur momen, tema, kuis, voucher, dan fitur interaktif lainnya.</p>
+      <div x-show="viewMode === 'editor'" class="max-w-2xl mx-auto bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-800 shadow-2xl space-y-6 animate-fade-in text-slate-200">
+        <div class="border-b border-slate-800 pb-3">
+          <h2 class="text-xl font-serif font-bold text-white">Edit Kartu Ucapan</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Atur momen, tema visual, kuis, voucher, dan fitur interaktif lainnya.</p>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-700">1. Pilihan Momen Spesial</label>
-          <select x-model="activeProject.type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium">
+          <label class="text-xs font-bold text-slate-300">1. Pilihan Momen Spesial</label>
+          <select x-model="activeProject.type" class="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-rose-500 font-medium">
             <option value="anniversary">Happy Anniversary / Jadian</option>
             <option value="birthday">Happy Birthday / Ulang Tahun</option>
             <option value="valentine">Happy Valentine / Hari Kasih Sayang</option>
@@ -884,54 +1021,51 @@
 
         <div>
           <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-bold text-slate-700">2. Pilih Tampilan Tema (Gaya Moodboard Collage)</label>
-            <span class="text-[10px] text-slate-400">Klik salah satu swatch</span>
+            <label class="text-xs font-bold text-slate-300">2. Pilih Tampilan Tema Visual</label>
+            <span class="text-[10px] text-slate-400">Pilih gaya sesuai preferensi</span>
           </div>
 
-          <div class="bg-moodboard-pattern p-4 md:p-6 rounded-2xl border border-stone-300 relative overflow-hidden shadow-inner">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 relative z-10">
+          <div class="bg-slate-950 p-4 md:p-5 rounded-2xl border border-slate-800 relative overflow-hidden shadow-inner">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 relative z-10">
               
               <button @click="activeProject.theme = 'lovely'" 
-                      :class="activeProject.theme === 'lovely' ? 'ring-4 ring-rose-500 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
-                      class="bg-gradient-to-br from-pink-100 to-rose-200 p-4 rounded-2xl border border-pink-300 text-left transition-all -rotate-2 shadow-md relative">
-                <div class="washi-tape absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-4"></div>
-                <span class="block text-[10px] font-bold text-pink-600 uppercase tracking-wider">Theme 01</span>
-                <span class="block font-serif text-sm font-bold text-slate-800 mt-1">Lovely Glass</span>
-                <span class="block text-[9px] text-pink-700 mt-1 leading-tight">Pink lembut, glassmorphism, & font serif romantis.</span>
+                      :class="activeProject.theme === 'lovely' ? 'ring-2 ring-rose-500 scale-105 z-20 shadow-lg shadow-rose-950' : 'opacity-80 hover:opacity-100 hover:scale-102'"
+                      class="bg-gradient-to-br from-slate-900 to-rose-950 p-4 rounded-xl border border-rose-500/40 text-left transition-all relative">
+                <span class="block text-[9px] font-bold text-rose-400 uppercase tracking-widest">Theme 01</span>
+                <span class="block font-serif text-sm font-bold text-white mt-1">Lovely Glass</span>
+                <span class="block text-[9px] text-slate-400 mt-1 leading-tight">Glassmorphism modern, animasi glowing, & font serif romantis.</span>
               </button>
 
               <button @click="activeProject.theme = 'moodboard'" 
-                      :class="activeProject.theme === 'moodboard' ? 'ring-4 ring-slate-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
-                      class="bg-white p-4 rounded-none border border-slate-300 text-left transition-all rotate-2 shadow-md relative">
-                <div class="w-2.5 h-2.5 rounded-full bg-rose-500 absolute -top-1 left-3 shadow-sm"></div>
-                <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Theme 02</span>
+                      :class="activeProject.theme === 'moodboard' ? 'ring-2 ring-amber-400 scale-105 z-20 shadow-lg shadow-amber-950' : 'opacity-80 hover:opacity-100 hover:scale-102'"
+                      class="bg-[#ded3be] p-4 rounded-xl border border-amber-900/30 text-left transition-all relative text-slate-900">
+                <span class="block text-[9px] font-bold text-amber-900 uppercase tracking-widest">Theme 02</span>
                 <span class="block font-sans text-sm font-black text-slate-900 mt-1">Moodboard Pin</span>
-                <span class="block text-[9px] text-slate-500 mt-1 leading-tight">Kolase foto, paper clip, & kertas memo terpisah.</span>
+                <span class="block text-[9px] text-slate-700 mt-1 leading-tight">Kolase majalah/polaroid, selotip, jepitan foto, & kertas memo.</span>
               </button>
 
               <button @click="activeProject.theme = 'retro'" 
-                      :class="activeProject.theme === 'retro' ? 'ring-4 ring-cyan-400 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
-                      class="bg-slate-900 p-4 rounded-none border-2 border-cyan-400 text-left transition-all -rotate-1 shadow-md relative">
-                <span class="block text-[10px] font-pixel text-cyan-300 uppercase tracking-widest">Theme 03</span>
-                <span class="block font-pixel text-lg text-pink-400 leading-tight">Y2K RETRO 90S</span>
-                <span class="block text-[9px] text-slate-300 mt-1 leading-tight">Jendela OS klasik, font piksel, & warna neon.</span>
+                      :class="activeProject.theme === 'retro' ? 'ring-2 ring-cyan-400 scale-105 z-20 shadow-lg shadow-cyan-950' : 'opacity-80 hover:opacity-100 hover:scale-102'"
+                      class="bg-slate-950 p-4 rounded-xl border-2 border-cyan-400 text-left transition-all relative">
+                <span class="block text-[9px] font-pixel text-cyan-400 uppercase tracking-widest">Theme 03</span>
+                <span class="block font-pixel text-base text-pink-400 leading-tight">Y2K RETRO 90S</span>
+                <span class="block text-[9px] text-slate-400 mt-1 leading-tight">Jendela OS arcade, scanline CRT, font piksel, & neon glowing.</span>
               </button>
 
               <button @click="activeProject.theme = 'vintage'" 
-                      :class="activeProject.theme === 'vintage' ? 'ring-4 ring-amber-800 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
-                      class="bg-[#e8decb] p-4 rounded-none border border-amber-900/30 text-left transition-all rotate-3 shadow-md relative">
-                <div class="w-6 h-6 border-2 border-dashed border-amber-800/40 absolute top-2 right-2 text-[8px] flex items-center justify-center font-mono">STAMP</div>
-                <span class="block text-[10px] font-mono text-amber-900 uppercase">Theme 04</span>
+                      :class="activeProject.theme === 'vintage' ? 'ring-2 ring-amber-600 scale-105 z-20 shadow-lg shadow-amber-950' : 'opacity-80 hover:opacity-100 hover:scale-102'"
+                      class="bg-[#e2d5c3] p-4 rounded-xl border border-amber-900/30 text-left transition-all relative text-stone-900">
+                <span class="block text-[9px] font-mono text-amber-900 uppercase tracking-widest">Theme 04</span>
                 <span class="block font-mono font-bold text-sm text-stone-900 mt-1">Vintage Paper</span>
-                <span class="block text-[9px] text-amber-900/80 mt-1 leading-tight">Kertas kraft tua, mesin ketik, & stempel pos.</span>
+                <span class="block text-[9px] text-amber-900/80 mt-1 leading-tight">Kertas perkamen tua, mesin ketik, stempel lilin (wax seal).</span>
               </button>
 
               <button @click="activeProject.theme = 'doodle'" 
-                      :class="activeProject.theme === 'doodle' ? 'ring-4 ring-purple-600 scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-102'"
-                      class="bg-doodle-grid p-4 rounded-lg border-2 border-slate-800 text-left transition-all -rotate-2 shadow-md relative">
-                <span class="block text-[10px] font-hand font-bold text-purple-700">Theme 05</span>
-                <span class="block font-hand text-xl font-bold text-slate-900 leading-tight">Journal Doodle</span>
-                <span class="block text-[9px] text-slate-600 mt-1 leading-tight">Sketsa kertas kotak, font cakar ayam, & orat-aret.</span>
+                      :class="activeProject.theme === 'doodle' ? 'ring-2 ring-indigo-500 scale-105 z-20 shadow-lg shadow-indigo-950' : 'opacity-80 hover:opacity-100 hover:scale-102'"
+                      class="bg-doodle-grid p-4 rounded-xl border-2 border-slate-900 text-left transition-all relative text-slate-900">
+                <span class="block text-[9px] font-hand font-bold text-indigo-700">Theme 05</span>
+                <span class="block font-hand text-lg font-bold text-slate-900 leading-tight">Journal Doodle</span>
+                <span class="block text-[9px] text-slate-600 mt-1 leading-tight">Kertas kotak sketsa, font cakar ayam, & sticky note kuning.</span>
               </button>
 
             </div>
@@ -939,53 +1073,59 @@
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-700">Judul Ucapan</label>
-          <input type="text" x-model="activeProject.title" placeholder="Contoh: Happy 1st Anniversary My Love" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+          <label class="text-xs font-bold text-slate-300">Judul Ucapan</label>
+          <input type="text" x-model="activeProject.title" placeholder="Contoh: Happy 1st Anniversary My Love" class="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-rose-500 font-medium" />
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-700">Tanggal Momen / Tanggal Jadian</label>
-          <input type="datetime-local" x-model="activeProject.startDate" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+          <label class="text-xs font-bold text-slate-300">Tanggal Momen / Tanggal Jadian</label>
+          <input type="datetime-local" x-model="activeProject.startDate" class="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-rose-500 font-medium" />
         </div>
 
         <!-- FITUR PRIVASI & KUIS -->
-        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🔒 Personalisasi & Kuis Keamanan</h3>
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            Personalisasi & Kuis Keamanan
+          </h3>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-semibold text-slate-700">Proteksi PIN (4 Digit / Opsional)</label>
-              <input type="password" maxlength="4" x-model="activeProject.pin" placeholder="Misal: 1211" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+              <label class="text-xs font-semibold text-slate-300">Proteksi PIN (4 Digit / Opsional)</label>
+              <input type="password" maxlength="4" x-model="activeProject.pin" placeholder="Misal: 1211" class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500 font-mono" />
             </div>
 
             <div>
-              <label class="text-xs font-semibold text-slate-700">Jawaban Kuis Romantis</label>
-              <input type="text" x-model="activeProject.quizAnswer" placeholder="Misal: Cafe Monokrom" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+              <label class="text-xs font-semibold text-slate-300">Jawaban Kuis Romantis</label>
+              <input type="text" x-model="activeProject.quizAnswer" placeholder="Misal: Cafe Monokrom" class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500" />
             </div>
           </div>
 
           <div>
-            <label class="text-xs font-semibold text-slate-700">Pertanyaan Kuis Romantis (Opsional)</label>
-            <input type="text" x-model="activeProject.quizQuestion" placeholder="Contoh: Di mana tempat pertama kali kita kencan?" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+            <label class="text-xs font-semibold text-slate-300">Pertanyaan Kuis Romantis (Opsional)</label>
+            <input type="text" x-model="activeProject.quizQuestion" placeholder="Contoh: Di mana tempat pertama kali kita kencan?" class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500" />
           </div>
         </div>
 
         <!-- MUSIK & PARTIKEL -->
-        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-4">
-          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🎵 Musik & Visual Particles</h3>
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-4">
+          <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-2v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-2"/></svg>
+            Musik & Efek Partikel Visual
+          </h3>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-bold text-slate-700">Link Musik Background (.mp3)</label>
-              <input type="text" x-model="activeProject.audioUrl" placeholder="https://..." class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+              <label class="text-xs font-bold text-slate-300">Link Musik Background (.mp3)</label>
+              <input type="text" x-model="activeProject.audioUrl" placeholder="https://..." class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500 font-medium" />
             </div>
 
             <div>
-              <label class="text-xs font-semibold text-slate-700">Efek Partikel Visual</label>
-              <select x-model="activeProject.particleEffect" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800">
-                <option value="petals">Kelopak Bunga Gugur 🌸</option>
-                <option value="fireworks">Kembang Api ✨</option>
-                <option value="stars">Bintang Menyala ⭐</option>
+              <label class="text-xs font-semibold text-slate-300">Efek Partikel Visual</label>
+              <select x-model="activeProject.particleEffect" class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500">
+                <option value="petals">Kelopak Bunga Gugur</option>
+                <option value="fireworks">Kembang Api / Percikan Cahaya</option>
+                <option value="stars">Bintang-Bintang Menyala</option>
                 <option value="none">Tanpa Efek Partikel</option>
               </select>
             </div>
@@ -995,39 +1135,42 @@
         <!-- FOTO POLAROID -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label class="text-xs font-bold text-slate-700">Daftar Link Foto Polaroid</label>
-            <button @click="addPhotoField()" class="text-xs font-bold text-slate-900 hover:underline">+ Tambah Foto</button>
+            <label class="text-xs font-bold text-slate-300">Daftar Link Foto Polaroid</label>
+            <button @click="addPhotoField()" class="text-xs font-bold text-rose-400 hover:underline">+ Tambah Foto</button>
           </div>
           <template x-for="(photo, idx) in activeProject.photos" :key="idx">
             <div class="flex gap-2 mb-2">
-              <input type="text" x-model="activeProject.photos[idx]" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs focus:outline-none focus:border-slate-800 font-medium" />
-              <button @click="removePhotoField(idx)" class="bg-slate-100 text-slate-600 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-200">Hapus</button>
+              <input type="text" x-model="activeProject.photos[idx]" class="flex-1 bg-slate-950 border border-slate-800 text-white rounded-xl p-2.5 text-xs focus:outline-none focus:border-rose-500 font-medium" />
+              <button @click="removePhotoField(idx)" class="bg-slate-800 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold hover:bg-slate-700">Hapus</button>
             </div>
           </template>
         </div>
 
         <!-- PESAN & GOSOK HADIAH -->
         <div>
-          <label class="text-xs font-bold text-slate-700">Pesan Romantis / Surat Cinta</label>
-          <textarea x-model="activeProject.message" rows="4" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 leading-relaxed font-medium"></textarea>
+          <label class="text-xs font-bold text-slate-300">Pesan Romantis / Surat Cinta</label>
+          <textarea x-model="activeProject.message" rows="4" placeholder="Tuliskan pesan indah di sini..." class="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-rose-500 leading-relaxed font-medium"></textarea>
         </div>
 
         <div>
-          <label class="text-xs font-bold text-slate-700">Pesan Rahasia Scratch Card (Kartu Gosok)</label>
-          <input type="text" x-model="activeProject.scratchMessage" placeholder="Misal: Kamu berhak dapat pelukan hangat dan es krim!" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-slate-800 font-medium" />
+          <label class="text-xs font-bold text-slate-300">Pesan Rahasia Scratch Card (Kartu Gosok)</label>
+          <input type="text" x-model="activeProject.scratchMessage" placeholder="Misal: Kamu berhak dapat pelukan hangat dan es krim!" class="w-full bg-slate-950 border border-slate-800 text-white rounded-xl p-3 text-xs mt-1 focus:outline-none focus:border-rose-500 font-medium" />
         </div>
 
         <!-- COUNTDOWN EVENT -->
-        <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
-          <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">⏳ Countdown Event Mendatang</h3>
+        <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
+          <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Countdown Event Mendatang
+          </h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-semibold text-slate-700">Nama Acara / Event</label>
-              <input type="text" x-model="activeProject.nextEventTitle" placeholder="Misal: Liburan Bali" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+              <label class="text-xs font-semibold text-slate-300">Nama Acara / Event</label>
+              <input type="text" x-model="activeProject.nextEventTitle" placeholder="Misal: Liburan Bali" class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500" />
             </div>
             <div>
-              <label class="text-xs font-semibold text-slate-700">Tanggal Acara</label>
-              <input type="datetime-local" x-model="activeProject.nextEventDate" class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-slate-800" />
+              <label class="text-xs font-semibold text-slate-300">Tanggal Acara</label>
+              <input type="datetime-local" x-model="activeProject.nextEventDate" class="w-full bg-slate-900 border border-slate-800 text-white rounded-xl p-2.5 text-xs mt-1 focus:outline-none focus:border-rose-500" />
             </div>
           </div>
         </div>
@@ -1035,172 +1178,167 @@
         <!-- KUPON CINTA & BUCKET LIST -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Vouchers -->
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+          <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">🎟️ Kupon Cinta Custom</h3>
-              <button @click="addVoucherField()" class="text-[10px] font-bold text-slate-900 hover:underline">+ Tambah</button>
+              <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider">Kupon Cinta Custom</h3>
+              <button @click="addVoucherField()" class="text-[10px] font-bold text-white hover:underline">+ Tambah</button>
             </div>
             <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
               <div class="flex gap-2 mb-2">
-                <input type="text" x-model="activeProject.vouchers[idx].title" class="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-xs" />
-                <button @click="removeVoucherField(idx)" class="text-rose-500 font-bold text-xs px-2">✕</button>
+                <input type="text" x-model="activeProject.vouchers[idx].title" class="flex-1 bg-slate-900 border border-slate-800 text-white rounded-lg p-2 text-xs" />
+                <button @click="removeVoucherField(idx)" class="text-rose-400 font-bold text-xs px-2">✕</button>
               </div>
             </template>
           </div>
 
           <!-- Bucket List -->
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+          <div class="p-4 bg-slate-950 border border-slate-800 rounded-2xl space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Future Bucket List</h3>
-              <button @click="addBucketField()" class="text-[10px] font-bold text-slate-900 hover:underline">+ Tambah</button>
+              <h3 class="text-xs font-bold text-rose-400 uppercase tracking-wider">Target Impian Bersama</h3>
+              <button @click="addBucketField()" class="text-[10px] font-bold text-white hover:underline">+ Tambah</button>
             </div>
             <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
               <div class="flex gap-2 mb-2">
-                <input type="text" x-model="activeProject.bucketList[idx].text" class="flex-1 bg-white border border-slate-200 rounded-lg p-2 text-xs" />
-                <button @click="removeBucketField(idx)" class="text-rose-500 font-bold text-xs px-2">✕</button>
+                <input type="text" x-model="activeProject.bucketList[idx].text" class="flex-1 bg-slate-900 border border-slate-800 text-white rounded-lg p-2 text-xs" />
+                <button @click="removeBucketField(idx)" class="text-rose-400 font-bold text-xs px-2">✕</button>
               </div>
             </template>
           </div>
         </div>
 
         <div class="pt-2 flex gap-3">
-          <button @click="saveProject()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl text-xs transition-all active:scale-95 shadow-md">
-            Simpan Kartu
+          <button @click="saveProject()" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 rounded-xl text-xs transition-all active:scale-95 shadow-lg shadow-rose-950">
+            Simpan Kartu Ucapan
           </button>
-          <button @click="openPreview(activeProject)" class="bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-5 py-3.5 rounded-xl text-xs transition-all active:scale-95">
+          <button @click="openPreview(activeProject)" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-5 py-3.5 rounded-xl text-xs transition-all active:scale-95">
             Preview
           </button>
         </div>
       </div>
 
-      <!-- ================= 3. PUBLIC VIEW & ANIMATED OPENING SCREEN ================= -->
+      <!-- ================= 3. PUBLIC VIEW & FULLSCREEN ANIMATED DISPLAY SCREEN ================= -->
       <div x-show="viewMode === 'public'" 
            :class="{
-             'bg-gradient-to-br from-pink-100 via-rose-50 to-pink-200 text-slate-800': activeProject.theme === 'lovely',
+             'bg-gradient-to-br from-slate-950 via-rose-950 to-slate-900 text-slate-100': activeProject.theme === 'lovely',
              'bg-moodboard-pattern text-slate-900': activeProject.theme === 'moodboard',
-             'bg-slate-950 text-cyan-300': activeProject.theme === 'retro',
-             'bg-[#f0e7d5] text-stone-900': activeProject.theme === 'vintage',
+             'bg-slate-950 text-cyan-300 relative': activeProject.theme === 'retro',
+             'bg-[#efe2ce] text-stone-900': activeProject.theme === 'vintage',
              'bg-doodle-grid text-slate-900': activeProject.theme === 'doodle'
            }" 
-           class="min-h-[92vh] flex flex-col items-center justify-center p-3 md:p-6 relative transition-all duration-500 animate-fade-in rounded-3xl overflow-hidden">
+           class="min-h-screen w-full flex flex-col items-center justify-start p-4 md:p-8 lg:p-12 relative transition-all duration-500 animate-fade-in overflow-x-hidden">
         
         <audio id="bgAudio" :src="activeProject.audioUrl" loop></audio>
 
-        <!-- VISUAL PARTICLES BACKGROUND -->
-        <template x-if="activeProject.particleEffect && activeProject.particleEffect !== 'none'">
-          <div class="absolute inset-0 pointer-events-none overflow-hidden z-0 no-export">
-            <template x-for="n in 16" :key="n">
-              <div class="absolute animate-particle text-xl select-none"
-                   :style="`left: ${Math.random() * 100}%; animation-duration: ${3 + Math.random() * 5}s; animation-delay: ${Math.random() * 4}s; opacity: ${0.4 + Math.random() * 0.6};`"
-                   x-text="activeProject.particleEffect === 'petals' ? '🌸' : (activeProject.particleEffect === 'fireworks' ? '✨' : '⭐')">
-              </div>
-            </template>
-          </div>
-        </template>
+        <!-- REAL CANVAS PARTICLES ENGINE (NON-RIGID, NO EMOJIS) -->
+        <canvas id="canvasParticles" class="fixed inset-0 pointer-events-none z-0 w-full h-full no-export"></canvas>
+
+        <!-- RETRO SCANLINE OVERLAY -->
+        <div x-show="activeProject.theme === 'retro'" class="fixed inset-0 bg-crt-overlay z-10 opacity-70 pointer-events-none"></div>
 
         <!-- FLOATING CONTROLS (AUDIO & DASHBOARD) -->
         <div x-show="!isRecipientView" class="fixed top-4 left-4 z-40 no-export">
-          <button @click="viewMode = 'dashboard'" class="bg-white/90 backdrop-blur-md text-slate-800 px-4 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all">
+          <button @click="viewMode = 'dashboard'" class="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-slate-700 hover:bg-slate-800 transition-all flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Dashboard
           </button>
         </div>
 
         <div class="fixed top-4 right-4 z-40 flex flex-wrap justify-end gap-2 no-export">
-          <button @click="toggleAudio()" class="bg-white/90 backdrop-blur-md text-slate-800 px-3.5 py-2 rounded-full text-xs font-bold shadow-md border border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full" :class="isAudioPlaying ? 'bg-rose-500 animate-ping' : 'bg-slate-300'"></span>
-            <span x-text="isAudioPlaying ? '🎵 Musik On' : '🎵 Musik Off'"></span>
+          <button @click="toggleAudio()" class="bg-slate-900/90 backdrop-blur-md text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg border border-slate-700 hover:bg-slate-800 transition-all flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full" :class="isAudioPlaying ? 'bg-rose-500 animate-ping' : 'bg-slate-500'"></span>
+            <span x-text="isAudioPlaying ? 'Musik Aktif' : 'Musik Mati'"></span>
           </button>
         </div>
 
-        <!-- STEP 1: PROTEKSI PIN (JIKA ADA PIN & BELUM DIUNLOCK) -->
-        <div x-show="activeProject.pin && !isPinUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-10">
-          <div :class="{ 'animate-shake border-rose-400': pinError }" class="bg-white/90 backdrop-blur-xl border border-slate-200 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
-            <div class="w-14 h-14 bg-rose-100 text-rose-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner">🔒</div>
-            <h3 class="font-bold text-slate-800 text-base">Kartu Dilindungi PIN</h3>
-            <p class="text-xs text-slate-500">Masukkan 4 digit PIN / Tanggal Spesial untuk membuka pesan rahasia ini.</p>
+        <!-- STEP 1: PROTEKSI PIN -->
+        <div x-show="activeProject.pin && !isPinUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-20 pt-12">
+          <div :class="{ 'animate-shake border-rose-500': pinError }" class="bg-slate-900/95 backdrop-blur-2xl border border-slate-800 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
+            <div class="w-14 h-14 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl border border-rose-500/20 shadow-inner">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h3 class="font-bold text-white text-base">Kartu Dilindungi PIN</h3>
+            <p class="text-xs text-slate-400">Masukkan 4 digit PIN rahasia untuk membaca kartu ini.</p>
             
-            <input type="password" maxlength="4" x-model="inputPin" @keyup.enter="checkPin()" placeholder="****" class="w-full text-center text-2xl tracking-widest bg-slate-50 border border-slate-300 rounded-2xl p-3 focus:outline-none focus:border-rose-500 font-mono shadow-inner" />
+            <input type="password" maxlength="4" x-model="inputPin" @keyup.enter="checkPin()" placeholder="****" class="w-full text-center text-2xl tracking-widest bg-slate-950 text-white border border-slate-800 rounded-2xl p-3 focus:outline-none focus:border-rose-500 font-mono shadow-inner" />
             
-            <button @click="checkPin()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md">
+            <button @click="checkPin()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-lg shadow-rose-950">
               Buka Kunci PIN
             </button>
           </div>
         </div>
 
-        <!-- STEP 2: KUIS ROMANTIS (JIKA ADA KUIS & BELUM DIUNLOCK) -->
-        <div x-show="isPinUnlocked && activeProject.quizQuestion && !isQuizUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-10">
-          <div :class="{ 'animate-shake border-rose-400': quizError }" class="bg-white/90 backdrop-blur-xl border border-slate-200 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
-            <div class="w-14 h-14 bg-pink-100 text-pink-500 rounded-full flex items-center justify-center mx-auto text-2xl shadow-inner animate-bounce">❓</div>
-            <h3 class="font-bold text-slate-800 text-base">Kuis Uji Kenangan</h3>
-            <p class="text-xs text-rose-600 font-semibold bg-rose-50 p-3 rounded-xl border border-rose-100 leading-relaxed" x-text="activeProject.quizQuestion"></p>
+        <!-- STEP 2: KUIS ROMANTIS -->
+        <div x-show="isPinUnlocked && activeProject.quizQuestion && !isQuizUnlocked" class="w-full max-w-sm my-auto animate-fade-in relative z-20 pt-12">
+          <div :class="{ 'animate-shake border-rose-500': quizError }" class="bg-slate-900/95 backdrop-blur-2xl border border-slate-800 p-8 rounded-3xl shadow-2xl text-center space-y-4 transition-all">
+            <div class="w-14 h-14 bg-rose-500/10 text-rose-400 rounded-full flex items-center justify-center mx-auto text-xl border border-rose-500/20 shadow-inner">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <h3 class="font-bold text-white text-base">Kuis Uji Kenangan</h3>
+            <p class="text-xs text-rose-300 font-semibold bg-rose-950/40 p-3 rounded-xl border border-rose-500/20 leading-relaxed" x-text="activeProject.quizQuestion"></p>
             
-            <input type="text" x-model="inputQuiz" @keyup.enter="checkQuiz()" placeholder="Tulis jawabanmu di sini..." class="w-full text-center bg-slate-50 border border-slate-300 rounded-2xl p-3 text-xs focus:outline-none focus:border-rose-500 font-medium shadow-inner" />
+            <input type="text" x-model="inputQuiz" @keyup.enter="checkQuiz()" placeholder="Tulis jawabanmu..." class="w-full text-center bg-slate-950 border border-slate-800 text-white rounded-2xl p-3 text-xs focus:outline-none focus:border-rose-500 font-medium shadow-inner" />
             
-            <button @click="checkQuiz()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md">
+            <button @click="checkQuiz()" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-lg shadow-rose-950">
               Jawab & Buka Kartu
             </button>
           </div>
         </div>
 
-        <!-- UNOPENED CARD -->
-        <div x-show="(isPinUnlocked || !activeProject.pin) && (isQuizUnlocked || !activeProject.quizQuestion) && !isCardOpened" class="w-full max-w-md my-auto animate-fade-in relative z-10">
+        <!-- UNOPENED CARD COVER SCREEN -->
+        <div x-show="(isPinUnlocked || !activeProject.pin) && (isQuizUnlocked || !activeProject.quizQuestion) && !isCardOpened" class="w-full max-w-md my-auto animate-fade-in relative z-20 pt-12">
           
           <div :class="{
-                 'bg-white/80 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-8 text-center': activeProject.theme === 'lovely',
-                 'bg-white border-2 border-slate-800 shadow-xl rounded-none p-8 text-center relative': activeProject.theme === 'moodboard',
-                 'bg-slate-900 border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] rounded-none p-8 text-center': activeProject.theme === 'retro',
-                 'bg-[#fdfaf3] border border-amber-900/40 shadow-2xl rounded-none p-8 text-center relative': activeProject.theme === 'vintage',
-                 'bg-white border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-8 text-center': activeProject.theme === 'doodle'
+                 'bg-slate-900/80 backdrop-blur-2xl border border-rose-500/30 shadow-2xl rounded-[2.5rem] p-8 text-center animate-float-glass': activeProject.theme === 'lovely',
+                 'bg-white border-2 border-slate-800 shadow-2xl rounded-none p-8 text-center relative animate-paper-wiggle': activeProject.theme === 'moodboard',
+                 'bg-slate-950 border-2 border-cyan-400 animate-neon-pulse rounded-none p-8 text-center': activeProject.theme === 'retro',
+                 'bg-[#faf3e0] border border-amber-900/40 shadow-2xl rounded-none p-8 text-center relative': activeProject.theme === 'vintage',
+                 'bg-white border-4 border-slate-900 shadow-[10px_10px_0px_0px_rgba(15,23,42,1)] rounded-xl p-8 text-center': activeProject.theme === 'doodle'
                }">
 
-            <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-4 -mx-4 mb-6">
+            <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-4 -mx-4 mb-6 font-bold">
               <span>SPECIAL_PRESENT.EXE</span>
               <span>[X]</span>
             </div>
-            <div x-show="activeProject.theme === 'moodboard'" class="washi-tape absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5"></div>
-            <div x-show="activeProject.theme === 'vintage'" class="w-8 h-8 border-2 border-dashed border-amber-800/40 absolute top-3 right-3 text-[9px] flex items-center justify-center font-mono">GIFT</div>
+            <div x-show="activeProject.theme === 'moodboard'" class="washi-tape-pink absolute -top-3 left-1/2 -translate-x-1/2 w-24 h-5"></div>
+            <div x-show="activeProject.theme === 'vintage'" class="w-10 h-10 border-2 border-dashed border-amber-900/50 absolute top-4 right-4 text-[9px] flex items-center justify-center font-mono font-bold text-amber-900 uppercase">STAMP</div>
 
             <!-- MOMENT 1: ANNIVERSARY -->
             <template x-if="activeProject.type === 'anniversary'">
               <div class="space-y-6 flex flex-col items-center">
-                <div class="relative w-28 h-28 flex items-center justify-center animate-float">
-                  <svg class="w-8 h-8 text-rose-500 absolute -top-2 -left-2 animate-ping" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  <svg class="w-10 h-10 text-pink-400 absolute -bottom-1 -right-3 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                  <svg class="w-24 h-24 text-amber-800 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm-4 8c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v2H8v-2z"/>
-                  </svg>
+                <div class="relative w-24 h-24 flex items-center justify-center">
+                  <svg class="w-20 h-20 text-rose-500 drop-shadow-xl animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </div>
 
-                <div class="space-y-1.5">
+                <div class="space-y-2">
                   <span :class="{
-                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-rose-400 font-serif font-bold tracking-widest': activeProject.theme === 'lovely',
                            'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
-                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
-                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
-                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
-                         }" class="text-xs uppercase tracking-widest block">Special Anniversary Gift</span>
+                           'text-cyan-300 font-pixel text-base tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-950 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-xl': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase block">Special Anniversary Gift</span>
                   
                   <h3 :class="{
-                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
-                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
-                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
-                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
-                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
-                       }">Ada Kotak Cokelat & Pesan Untukmu</h3>
+                         'font-serif text-2xl font-bold text-white': activeProject.theme === 'lovely',
+                         'font-sans text-xl font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-2xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-xl font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-3xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Ada Pesan Spesial Untukmu</h3>
                   
-                  <p class="text-xs opacity-70">Sentuh tombol di bawah untuk membuka ucapan.</p>
+                  <p class="text-xs opacity-75">Klik tombol di bawah untuk membuka kartu.</p>
                 </div>
 
                 <button @click="openCardInteractive()" 
                         :class="{
-                          'bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl shadow-lg shadow-pink-200 hover:from-pink-600 hover:to-rose-600': activeProject.theme === 'lovely',
-                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl shadow-lg shadow-rose-950 hover:from-rose-600 hover:to-pink-700 animate-shimmer': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none border-b-4 border-slate-700': activeProject.theme === 'moodboard',
                           'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
-                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-amber-950 hover:bg-stone-900 text-amber-50 font-mono text-xs rounded-none border border-amber-800': activeProject.theme === 'vintage',
                           'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
                         }" 
-                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
-                  Buka Cokelat & Kartu
+                        class="w-full py-4 text-xs font-bold transition-all active:scale-95">
+                  Buka Kartu Ucapan
                 </button>
               </div>
             </template>
@@ -1208,44 +1346,42 @@
             <!-- MOMENT 2: BIRTHDAY -->
             <template x-if="activeProject.type === 'birthday'">
               <div class="space-y-6 flex flex-col items-center">
-                <div class="relative w-28 h-28 flex items-center justify-center">
-                  <svg class="w-8 h-10 text-amber-500 absolute -top-3 -left-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                  <svg class="w-8 h-10 text-purple-500 absolute -top-2 -right-3 animate-balloon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
-                  <div class="w-3 h-5 bg-amber-400 rounded-full absolute -top-1 animate-flame z-20"></div>
-                  <svg class="w-24 h-24 text-rose-500 drop-shadow-xl z-10" fill="currentColor" viewBox="0 0 24 24">
+                <div class="relative w-24 h-24 flex items-center justify-center">
+                  <div class="w-4 h-6 bg-amber-400 rounded-full absolute -top-2 animate-flame z-20"></div>
+                  <svg class="w-20 h-20 text-rose-500 drop-shadow-xl z-10" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 6a1 1 0 0 1 1 1v1h-2V7a1 1 0 0 1 1-1zm9 7v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zm-2 2H5v5h14v-5z"/>
                   </svg>
                 </div>
 
-                <div class="space-y-1.5">
+                <div class="space-y-2">
                   <span :class="{
-                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-rose-400 font-serif font-bold tracking-widest': activeProject.theme === 'lovely',
                            'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
-                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
-                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
-                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
-                         }" class="text-xs uppercase tracking-widest block">Happy Birthday Surprise</span>
+                           'text-cyan-300 font-pixel text-base tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-950 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-xl': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase block">Happy Birthday Surprise</span>
                   
                   <h3 :class="{
-                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
-                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
-                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
-                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
-                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                         'font-serif text-2xl font-bold text-white': activeProject.theme === 'lovely',
+                         'font-sans text-xl font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-2xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-xl font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-3xl font-bold text-slate-900': activeProject.theme === 'doodle'
                        }">Selamat Ulang Tahun!</h3>
                   
-                  <p class="text-xs opacity-70">Tiup lilinnya & buka kartu di dalamnya.</p>
+                  <p class="text-xs opacity-75">Tiup lilinnya & buka kartu di dalamnya.</p>
                 </div>
 
                 <button @click="openCardInteractive()" 
                         :class="{
-                          'bg-gradient-to-r from-amber-500 to-rose-500 text-white rounded-xl shadow-lg hover:from-amber-600 hover:to-rose-600': activeProject.theme === 'lovely',
-                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-gradient-to-r from-amber-500 to-rose-600 text-white rounded-xl shadow-lg hover:from-amber-600 hover:to-rose-700 animate-shimmer': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none border-b-4 border-slate-700': activeProject.theme === 'moodboard',
                           'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
-                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-amber-950 hover:bg-stone-900 text-amber-50 font-mono text-xs rounded-none border border-amber-800': activeProject.theme === 'vintage',
                           'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
                         }" 
-                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                        class="w-full py-4 text-xs font-bold transition-all active:scale-95">
                   Tiup Lilin & Buka Kartu
                 </button>
               </div>
@@ -1254,44 +1390,41 @@
             <!-- MOMENT 3: VALENTINE -->
             <template x-if="activeProject.type === 'valentine'">
               <div class="space-y-6 flex flex-col items-center">
-                <div class="relative w-28 h-28 flex items-center justify-center animate-balloon">
-                  <svg class="w-20 h-24 text-rose-500 drop-shadow-xl" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                  </svg>
-                  <svg class="w-12 h-14 text-pink-400 absolute top-0 -right-2 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                <div class="relative w-24 h-24 flex items-center justify-center">
+                  <svg class="w-20 h-20 text-rose-500 drop-shadow-2xl animate-pulse" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
                   </svg>
                 </div>
 
-                <div class="space-y-1.5">
+                <div class="space-y-2">
                   <span :class="{
-                           'text-pink-600 font-serif font-bold': activeProject.theme === 'lovely',
+                           'text-rose-400 font-serif font-bold tracking-widest': activeProject.theme === 'lovely',
                            'text-slate-900 font-sans font-black': activeProject.theme === 'moodboard',
-                           'text-cyan-300 font-pixel text-sm tracking-widest': activeProject.theme === 'retro',
-                           'text-amber-900 font-mono font-bold': activeProject.theme === 'vintage',
-                           'text-slate-900 font-hand font-bold text-lg': activeProject.theme === 'doodle'
-                         }" class="text-xs uppercase tracking-widest block">Happy Valentine's Day</span>
+                           'text-cyan-300 font-pixel text-base tracking-widest': activeProject.theme === 'retro',
+                           'text-amber-950 font-mono font-bold': activeProject.theme === 'vintage',
+                           'text-slate-900 font-hand font-bold text-xl': activeProject.theme === 'doodle'
+                         }" class="text-xs uppercase block">Happy Valentine's Day</span>
                   
                   <h3 :class="{
-                         'font-serif text-xl font-bold text-slate-800': activeProject.theme === 'lovely',
-                         'font-sans text-lg font-black text-slate-900': activeProject.theme === 'moodboard',
-                         'font-pixel text-xl text-pink-400': activeProject.theme === 'retro',
-                         'font-mono text-lg font-bold text-stone-900': activeProject.theme === 'vintage',
-                         'font-hand text-2xl font-bold text-slate-900': activeProject.theme === 'doodle'
-                       }">Ada Surat Cinta Spesial</h3>
+                         'font-serif text-2xl font-bold text-white': activeProject.theme === 'lovely',
+                         'font-sans text-xl font-black text-slate-900': activeProject.theme === 'moodboard',
+                         'font-pixel text-2xl text-pink-400': activeProject.theme === 'retro',
+                         'font-mono text-xl font-bold text-stone-900': activeProject.theme === 'vintage',
+                         'font-hand text-3xl font-bold text-slate-900': activeProject.theme === 'doodle'
+                       }">Surat Cinta Spesial</h3>
                   
-                  <p class="text-xs opacity-70">Sentuh untuk membuka kartu ucapan Valentine.</p>
+                  <p class="text-xs opacity-75">Klik untuk membuka kartu ucapan Valentine.</p>
                 </div>
 
                 <button @click="openCardInteractive()" 
                         :class="{
-                          'bg-gradient-to-r from-pink-500 to-rose-600 text-white rounded-xl shadow-lg hover:from-pink-600 hover:to-rose-700': activeProject.theme === 'lovely',
-                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none': activeProject.theme === 'moodboard',
+                          'bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-xl shadow-lg hover:from-rose-600 hover:to-pink-700 animate-shimmer': activeProject.theme === 'lovely',
+                          'bg-slate-900 hover:bg-slate-800 text-white rounded-none border-b-4 border-slate-700': activeProject.theme === 'moodboard',
                           'bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel text-sm rounded-none border border-cyan-200': activeProject.theme === 'retro',
-                          'bg-amber-900 hover:bg-amber-950 text-amber-50 font-mono text-xs rounded-none': activeProject.theme === 'vintage',
+                          'bg-amber-950 hover:bg-stone-900 text-amber-50 font-mono text-xs rounded-none border border-amber-800': activeProject.theme === 'vintage',
                           'bg-slate-900 hover:bg-slate-800 text-white font-hand text-xl rounded-none border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]': activeProject.theme === 'doodle'
                         }" 
-                        class="w-full py-3.5 text-xs font-bold transition-all active:scale-95">
+                        class="w-full py-4 text-xs font-bold transition-all active:scale-95">
                   Buka Kartu Valentine
                 </button>
               </div>
@@ -1300,251 +1433,615 @@
           </div>
         </div>
 
-        <!-- OPENED CARD -->
-        <div x-show="isCardOpened" id="exportableCard" 
-             :class="{
-               'bg-white/90 backdrop-blur-xl border border-pink-200 shadow-2xl rounded-[2.5rem] p-6 md:p-8': activeProject.theme === 'lovely',
-               'bg-white border border-stone-300 shadow-xl rounded-none p-6 md:p-8 relative': activeProject.theme === 'moodboard',
-               'bg-slate-900 border-2 border-cyan-400 shadow-[0_0_30px_rgba(34,211,238,0.2)] rounded-none p-6 md:p-8': activeProject.theme === 'retro',
-               'bg-[#fdfaf3] border border-amber-900/30 shadow-2xl rounded-none p-6 md:p-8 relative': activeProject.theme === 'vintage',
-               'bg-doodle-grid border-2 border-slate-900 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)] rounded-lg p-6 md:p-8': activeProject.theme === 'doodle'
-             }" 
-             class="max-w-md w-full my-8 space-y-6 text-center transition-all duration-300 relative z-10">
-
-          <div x-show="activeProject.theme === 'retro'" class="bg-cyan-400 text-slate-950 font-pixel text-xs px-2 py-1 flex items-center justify-between -mt-2 -mx-2 mb-4">
-            <span>DEARYOU_CARD.EXE</span>
-            <span>[X]</span>
-          </div>
-
-          <div class="space-y-2">
-            <span x-show="activeProject.theme === 'lovely'" class="inline-block bg-pink-100 text-pink-700 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-wider">
-              <span x-text="getBadgeText(activeProject.type)"></span>
-            </span>
-
-            <span x-show="activeProject.theme === 'moodboard'" class="inline-block bg-slate-900 text-white text-[10px] font-bold px-3 py-1 rounded-none uppercase tracking-widest">
-              <span x-text="getBadgeText(activeProject.type)"></span>
-            </span>
-
-            <span x-show="activeProject.theme === 'retro'" class="inline-block bg-pink-500 text-white font-pixel text-sm px-3 py-0.5 uppercase tracking-widest">
-              <span x-text="getBadgeText(activeProject.type)"></span>
-            </span>
-
-            <span x-show="activeProject.theme === 'vintage'" class="inline-block border border-dashed border-amber-900/40 text-amber-900 font-mono text-xs px-3 py-1 uppercase">
-              <span x-text="getBadgeText(activeProject.type)"></span>
-            </span>
-
-            <span x-show="activeProject.theme === 'doodle'" class="inline-block bg-amber-100 border-2 border-slate-900 text-slate-900 font-hand text-lg px-3 py-0.5 -rotate-2">
-              <span x-text="getBadgeText(activeProject.type)"></span>
-            </span>
-
-            <h1 :class="{
-                   'font-serif text-2xl md:text-3xl font-bold text-slate-800 mt-2': activeProject.theme === 'lovely',
-                   'font-sans text-xl md:text-2xl font-black text-slate-900 mt-2': activeProject.theme === 'moodboard',
-                   'font-pixel text-2xl md:text-3xl text-pink-400 mt-2 tracking-wide': activeProject.theme === 'retro',
-                   'font-mono text-xl md:text-2xl font-bold text-stone-900 mt-2': activeProject.theme === 'vintage',
-                   'font-hand text-3xl md:text-4xl font-bold text-slate-900 mt-1': activeProject.theme === 'doodle'
-                 }" 
-                x-text="activeProject.title"></h1>
-          </div>
-
-          <!-- Counter Container -->
-          <div :class="{
-                 'bg-pink-50/60 border border-pink-100 rounded-2xl p-4 shadow-inner': activeProject.theme === 'lovely',
-                 'bg-slate-100 border border-slate-200 rounded-none p-4': activeProject.theme === 'moodboard',
-                 'bg-slate-950 border border-cyan-400/40 rounded-none p-4': activeProject.theme === 'retro',
-                 'bg-[#f4ebd9] border border-amber-900/20 rounded-none p-4': activeProject.theme === 'vintage',
-                 'bg-white border-2 border-slate-900 rounded-none p-4': activeProject.theme === 'doodle'
-               }">
-            
-            <p :class="{
-                 'text-pink-600 text-[10px] font-bold uppercase tracking-wider': activeProject.theme === 'lovely',
-                 'text-slate-700 text-[10px] font-bold uppercase tracking-widest': activeProject.theme === 'moodboard',
-                 'text-cyan-300 font-pixel text-xs tracking-widest': activeProject.theme === 'retro',
-                 'text-amber-900 font-mono text-[10px] uppercase': activeProject.theme === 'vintage',
-                 'text-slate-800 font-hand text-base font-bold': activeProject.theme === 'doodle'
-               }" class="mb-3">Telah Bersama Selama</p>
-
-            <div class="grid grid-cols-3 gap-2">
+        <!-- OPENED CARD DISPLAY: FULL RESPONSIVE & DISTINCT LAYOUT PER THEME -->
+        <div x-show="isCardOpened" id="exportableCard" class="w-full max-w-6xl mx-auto my-auto pt-10 pb-8 z-20 relative transition-all duration-300">
+          
+          <!-- LAYOUT TEMA 1: LOVELY GLASS (Glassmorphism 2-Kolom Split Layout) -->
+          <template x-if="activeProject.theme === 'lovely'">
+            <div class="bg-slate-900/80 backdrop-blur-2xl border border-rose-500/30 shadow-2xl rounded-[2.5rem] p-6 md:p-10 text-slate-100 space-y-8">
               
-              <div :class="{
-                     'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
-                     'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
-                     'bg-slate-900 border border-pink-500 rounded-none p-2': activeProject.theme === 'retro',
-                     'bg-[#fdfdfb] border border-stone-300 rounded-none p-2': activeProject.theme === 'vintage',
-                     'bg-amber-50 border-2 border-slate-900 rounded-none p-2': activeProject.theme === 'doodle'
-                   }">
-                <span :class="{
-                        'text-pink-600 font-serif text-2xl font-bold': activeProject.theme === 'lovely',
-                        'text-slate-900 font-sans text-2xl font-black': activeProject.theme === 'moodboard',
-                        'text-pink-400 font-pixel text-2xl': activeProject.theme === 'retro',
-                        'text-stone-900 font-mono text-xl font-bold': activeProject.theme === 'vintage',
-                        'text-slate-900 font-hand text-3xl font-bold': activeProject.theme === 'doodle'
-                      }" class="block" x-text="counter.years"></span>
-                <span class="text-[9px] font-semibold opacity-70 uppercase">Tahun</span>
+              <div class="text-center space-y-2">
+                <span class="inline-block bg-rose-500/20 text-rose-300 text-[10px] font-bold px-3.5 py-1 rounded-full uppercase tracking-widest border border-rose-500/30" x-text="getBadgeText(activeProject.type)"></span>
+                <h1 class="font-serif text-3xl md:text-5xl font-bold text-white tracking-tight" x-text="activeProject.title"></h1>
               </div>
 
-              <div :class="{
-                     'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
-                     'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
-                     'bg-slate-900 border border-pink-500 rounded-none p-2': activeProject.theme === 'retro',
-                     'bg-[#fdfdfb] border border-stone-300 rounded-none p-2': activeProject.theme === 'vintage',
-                     'bg-amber-50 border-2 border-slate-900 rounded-none p-2': activeProject.theme === 'doodle'
-                   }">
-                <span :class="{
-                        'text-pink-600 font-serif text-2xl font-bold': activeProject.theme === 'lovely',
-                        'text-slate-900 font-sans text-2xl font-black': activeProject.theme === 'moodboard',
-                        'text-pink-400 font-pixel text-2xl': activeProject.theme === 'retro',
-                        'text-stone-900 font-mono text-xl font-bold': activeProject.theme === 'vintage',
-                        'text-slate-900 font-hand text-3xl font-bold': activeProject.theme === 'doodle'
-                      }" class="block" x-text="counter.months"></span>
-                <span class="text-[9px] font-semibold opacity-70 uppercase">Bulan</span>
-              </div>
-
-              <div :class="{
-                     'bg-white rounded-xl p-2.5 border border-pink-100 shadow-sm': activeProject.theme === 'lovely',
-                     'bg-white border border-slate-300 rounded-none p-2': activeProject.theme === 'moodboard',
-                     'bg-slate-900 border border-pink-500 rounded-none p-2': activeProject.theme === 'retro',
-                     'bg-[#fdfdfb] border border-stone-300 rounded-none p-2': activeProject.theme === 'vintage',
-                     'bg-amber-50 border-2 border-slate-900 rounded-none p-2': activeProject.theme === 'doodle'
-                   }">
-                <span :class="{
-                        'text-pink-600 font-serif text-2xl font-bold': activeProject.theme === 'lovely',
-                        'text-slate-900 font-sans text-2xl font-black': activeProject.theme === 'moodboard',
-                        'text-pink-400 font-pixel text-2xl': activeProject.theme === 'retro',
-                        'text-stone-900 font-mono text-xl font-bold': activeProject.theme === 'vintage',
-                        'text-slate-900 font-hand text-3xl font-bold': activeProject.theme === 'doodle'
-                      }" class="block" x-text="counter.days"></span>
-                <span class="text-[9px] font-semibold opacity-70 uppercase">Hari</span>
-              </div>
-
-            </div>
-
-            <div class="mt-3 text-[11px] opacity-80 font-mono flex justify-center gap-2">
-              <span x-text="counter.hours + ' jam'"></span> •
-              <span x-text="counter.minutes + ' menit'"></span> •
-              <span x-text="counter.seconds + ' detik'"></span>
-            </div>
-          </div>
-
-          <!-- Photo Gallery -->
-          <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
-            <div class="relative overflow-hidden rounded-2xl bg-slate-100 border border-slate-200 aspect-[4/3] shadow-inner">
-              <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover transition-all duration-300 hover:scale-105" alt="Moment Photo" />
-            </div>
-            
-            <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
-              <template x-for="(photo, idx) in activeProject.photos" :key="idx">
-                <button @click="activePhotoIndex = idx" 
-                        :class="activePhotoIndex === idx ? 'ring-2 ring-rose-500 scale-105 shadow-md' : 'opacity-60 hover:opacity-100'" 
-                        class="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 transition-all">
-                  <img :src="photo" class="w-full h-full object-cover" />
-                </button>
-              </template>
-            </div>
-          </div>
-
-          <!-- Romantic Message -->
-          <div :class="{
-                 'bg-white/90 backdrop-blur-md rounded-2xl p-5 border border-pink-100 shadow-sm text-left': activeProject.theme === 'lovely',
-                 'bg-amber-50/80 border border-stone-300 rounded-none p-5 text-left relative': activeProject.theme === 'moodboard',
-                 'bg-slate-950 border border-cyan-400/50 rounded-none p-5 text-left font-pixel': activeProject.theme === 'retro',
-                 'bg-[#fdfdfb] border border-stone-300 rounded-none p-5 text-left font-mono': activeProject.theme === 'vintage',
-                 'bg-white border-2 border-slate-900 rounded-none p-5 text-left font-hand': activeProject.theme === 'doodle'
-               }">
-            <p :class="{
-                 'font-serif text-sm leading-relaxed text-slate-700 whitespace-pre-line': activeProject.theme === 'lovely',
-                 'font-sans text-xs leading-relaxed text-slate-800 whitespace-pre-line': activeProject.theme === 'moodboard',
-                 'font-pixel text-sm leading-relaxed text-cyan-200 whitespace-pre-line': activeProject.theme === 'retro',
-                 'font-mono text-xs leading-relaxed text-stone-800 whitespace-pre-line': activeProject.theme === 'vintage',
-                 'font-hand text-lg leading-relaxed text-slate-900 whitespace-pre-line': activeProject.theme === 'doodle'
-               }" x-text="activeProject.message"></p>
-          </div>
-
-          <!-- 1. GOSOK HADIAH (SCRATCH CARD) -->
-          <div x-show="activeProject.scratchMessage" class="bg-gradient-to-br from-rose-50 to-pink-50 border border-rose-200 rounded-2xl p-4 text-center space-y-2 shadow-sm">
-            <span class="text-xs font-bold text-rose-700 uppercase tracking-wider block">✨ Gosok Hadiah Rahasia ✨</span>
-            <div class="relative w-full max-w-[240px] h-20 mx-auto rounded-xl overflow-hidden border border-rose-200 bg-white flex items-center justify-center p-3 text-center shadow-inner">
-              <p class="text-xs font-bold text-rose-900 leading-tight" x-text="activeProject.scratchMessage"></p>
-              <canvas id="scratchCanvas" width="240" height="80" class="absolute inset-0 cursor-pointer touch-none z-10 transition-opacity duration-300"></canvas>
-            </div>
-          </div>
-
-          <!-- 2. COUNTDOWN EVENT MENDATANG -->
-          <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-slate-900 text-white rounded-2xl p-4 space-y-3 shadow-lg">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] font-bold text-rose-300 uppercase tracking-widest" x-text="'⏳ Event: ' + activeProject.nextEventTitle"></span>
-              <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-            </div>
-            
-            <div class="grid grid-cols-4 gap-2 text-center">
-              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
-                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.days"></span>
-                <span class="text-[8px] uppercase tracking-wider opacity-70">Hari</span>
-              </div>
-              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
-                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.hours"></span>
-                <span class="text-[8px] uppercase tracking-wider opacity-70">Jam</span>
-              </div>
-              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
-                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.minutes"></span>
-                <span class="text-[8px] uppercase tracking-wider opacity-70">Menit</span>
-              </div>
-              <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
-                <span class="block text-lg font-bold font-mono text-rose-300" x-text="nextEventCounter.seconds"></span>
-                <span class="text-[8px] uppercase tracking-wider opacity-70">Detik</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- 3. VOUCHER / KUPON CINTA CUSTOM -->
-          <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-3 text-left">
-            <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider text-center">🎟️ Voucher Cinta Spesial</h3>
-            <div class="space-y-2.5">
-              <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
-                <div class="ticket-stub bg-white border border-rose-200 rounded-xl p-3.5 flex items-center justify-between shadow-sm relative overflow-hidden transition-all hover:shadow-md">
-                  <div class="pr-2 space-y-0.5">
-                    <p class="font-bold text-xs text-slate-800" x-text="v.title"></p>
-                    <span class="text-[9px] font-semibold text-rose-500 block" x-text="v.claimed ? '✓ Voucher Telah Diklaim' : '• Masa Berlaku: Kapan Saja'"></span>
+              <!-- Desktop Grid Layout -->
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Column (5 Cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                  <!-- Live Counter -->
+                  <div class="bg-slate-950/70 border border-rose-500/20 rounded-2xl p-5 shadow-inner text-center">
+                    <p class="text-rose-400 text-[10px] font-bold uppercase tracking-widest mb-3">Telah Bersama Selama</p>
+                    <div class="grid grid-cols-3 gap-3">
+                      <div class="bg-slate-900 rounded-xl p-3 border border-slate-800">
+                        <span class="text-rose-400 font-serif text-3xl font-bold block" x-text="counter.years"></span>
+                        <span class="text-[9px] opacity-70 uppercase font-semibold">Tahun</span>
+                      </div>
+                      <div class="bg-slate-900 rounded-xl p-3 border border-slate-800">
+                        <span class="text-rose-400 font-serif text-3xl font-bold block" x-text="counter.months"></span>
+                        <span class="text-[9px] opacity-70 uppercase font-semibold">Bulan</span>
+                      </div>
+                      <div class="bg-slate-900 rounded-xl p-3 border border-slate-800">
+                        <span class="text-rose-400 font-serif text-3xl font-bold block" x-text="counter.days"></span>
+                        <span class="text-[9px] opacity-70 uppercase font-semibold">Hari</span>
+                      </div>
+                    </div>
+                    <div class="mt-3 text-[11px] opacity-80 font-mono flex justify-center gap-2">
+                      <span x-text="counter.hours + ' jam'"></span> •
+                      <span x-text="counter.minutes + ' menit'"></span> •
+                      <span x-text="counter.seconds + ' detik'"></span>
+                    </div>
                   </div>
-                  
-                  <button @click="claimVoucher(idx)" :disabled="v.claimed"
-                          :class="v.claimed ? 'bg-emerald-500 text-white cursor-default' : 'bg-rose-500 hover:bg-rose-600 text-white active:scale-95 shadow-md shadow-rose-200'"
-                          class="px-3.5 py-2 rounded-xl text-[11px] font-bold transition-all shrink-0">
-                    <span x-text="v.claimed ? 'TERKLAIM' : 'Klaim'"></span>
-                  </button>
+
+                  <!-- Photo Carousel -->
+                  <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
+                    <div class="rounded-2xl border border-rose-500/20 bg-slate-950 p-2 shadow-lg aspect-[4/3] overflow-hidden relative">
+                      <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover rounded-xl transition-all duration-300" />
+                    </div>
+                    <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
+                      <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                        <button @click="activePhotoIndex = idx" :class="activePhotoIndex === idx ? 'ring-2 ring-rose-500 scale-105' : 'opacity-60'" class="w-10 h-10 rounded-lg overflow-hidden border border-slate-700 transition-all">
+                          <img :src="photo" class="w-full h-full object-cover" />
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Countdown Event -->
+                  <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-slate-950 text-white border border-slate-800 rounded-2xl p-4 space-y-3 shadow-lg">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest" x-text="'Event: ' + activeProject.nextEventTitle"></span>
+                      <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2 text-center">
+                      <div class="bg-slate-900 p-2 rounded-xl border border-slate-800"><span class="block text-lg font-bold font-mono text-rose-400" x-text="nextEventCounter.days"></span><span class="text-[8px] uppercase tracking-wider text-slate-400">Hari</span></div>
+                      <div class="bg-slate-900 p-2 rounded-xl border border-slate-800"><span class="block text-lg font-bold font-mono text-rose-400" x-text="nextEventCounter.hours"></span><span class="text-[8px] uppercase tracking-wider text-slate-400">Jam</span></div>
+                      <div class="bg-slate-900 p-2 rounded-xl border border-slate-800"><span class="block text-lg font-bold font-mono text-rose-400" x-text="nextEventCounter.minutes"></span><span class="text-[8px] uppercase tracking-wider text-slate-400">Menit</span></div>
+                      <div class="bg-slate-900 p-2 rounded-xl border border-slate-800"><span class="block text-lg font-bold font-mono text-rose-400" x-text="nextEventCounter.seconds"></span><span class="text-[8px] uppercase tracking-wider text-slate-400">Detik</span></div>
+                    </div>
+                  </div>
                 </div>
-              </template>
-            </div>
-          </div>
 
-          <!-- 4. FUTURE BUCKET LIST -->
-          <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-3 text-left">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider">📋 Target Impian Bersama</h3>
-              <span class="text-[10px] font-bold text-rose-500" x-text="bucketProgress + '% Terwujud'"></span>
-            </div>
+                <!-- Right Column (7 Cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                  <!-- Romantic Message -->
+                  <div class="bg-slate-950/70 backdrop-blur-md rounded-2xl p-6 border border-rose-500/20 shadow-sm text-left">
+                    <p class="font-serif text-base md:text-lg leading-relaxed text-slate-200 whitespace-pre-line" x-text="activeProject.message"></p>
+                  </div>
 
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-              <div class="bg-gradient-to-r from-pink-500 to-rose-500 h-full transition-all duration-500 rounded-full" :style="`width: ${bucketProgress}%`"></div>
-            </div>
+                  <!-- Scratch Card -->
+                  <div x-show="activeProject.scratchMessage" class="bg-gradient-to-br from-rose-950/40 to-slate-950 border border-rose-500/30 rounded-2xl p-5 text-center space-y-3 shadow-md">
+                    <span class="text-xs font-bold text-rose-300 uppercase tracking-widest block">Gosok Hadiah Rahasia</span>
+                    <div class="relative w-full max-w-[280px] h-20 mx-auto rounded-xl overflow-hidden border border-slate-800 bg-slate-900 flex items-center justify-center p-3 text-center shadow-inner">
+                      <p class="text-xs font-bold text-rose-300 leading-tight" x-text="activeProject.scratchMessage"></p>
+                      <canvas id="scratchCanvas" width="280" height="80" class="absolute inset-0 cursor-pointer touch-none z-10 transition-opacity duration-300"></canvas>
+                    </div>
+                  </div>
 
-            <div class="bg-white/80 border border-slate-200 rounded-2xl p-3.5 space-y-2 shadow-sm">
-              <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
-                <label @click="toggleBucket(idx)" class="flex items-center gap-3 cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-colors">
-                  <input type="checkbox" :checked="b.done" class="w-4 h-4 accent-rose-500 rounded cursor-pointer transition-transform active:scale-125" />
-                  <span class="text-xs font-medium text-slate-700 transition-all" :class="{ 'line-through text-slate-400 font-normal': b.done }" x-text="b.text"></span>
-                </label>
-              </template>
-            </div>
-          </div>
+                  <!-- Vouchers -->
+                  <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-3 text-left">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Voucher Cinta Spesial</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                        <div class="ticket-stub bg-white border border-slate-300 rounded-xl p-3.5 flex items-center justify-between shadow-sm text-slate-900">
+                          <div class="pr-2 space-y-0.5">
+                            <p class="font-bold text-xs text-slate-900" x-text="v.title"></p>
+                            <span class="text-[9px] font-semibold text-rose-600 block" x-text="v.claimed ? '✓ Terklaim' : 'Masa Berlaku: Kapan Saja'"></span>
+                          </div>
+                          <button @click="claimVoucher(idx)" :disabled="v.claimed" :class="v.claimed ? 'bg-emerald-600 text-white cursor-default' : 'bg-rose-600 hover:bg-rose-500 text-white'" class="px-3 py-1.5 rounded-xl text-[10px] font-bold shrink-0">
+                            <span x-text="v.claimed ? 'OK' : 'Klaim'"></span>
+                          </button>
+                        </div>
+                      </template>
+                    </div>
+                  </div>
 
-          <!-- 5. TOMBOL EKSPOR GAMBAR PNG -->
-          <div class="pt-4 border-t border-slate-200/60 no-export">
-            <button @click="exportToImage()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-2xl text-xs transition-all active:scale-95 shadow-md flex items-center justify-center gap-2">
-              <span>📷 Simpan Kartu Ucapan (.PNG)</span>
-            </button>
-          </div>
+                  <!-- Bucket List -->
+                  <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-3 text-left">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Target Impian Bersama</h3>
+                      <span class="text-[10px] font-bold text-rose-400" x-text="bucketProgress + '% Terwujud'"></span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div class="bg-gradient-to-r from-rose-500 to-pink-500 h-full transition-all duration-500 rounded-full" :style="`width: ${bucketProgress}%`"></div>
+                    </div>
+                    <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-2">
+                      <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                        <label @click="toggleBucket(idx)" class="flex items-center gap-3 cursor-pointer p-1.5 hover:bg-slate-900 rounded-xl">
+                          <input type="checkbox" :checked="b.done" class="w-4 h-4 accent-rose-500 rounded cursor-pointer" />
+                          <span class="text-xs font-medium text-slate-300" :class="{ 'line-through text-slate-500': b.done }" x-text="b.text"></span>
+                        </label>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Export Image Button -->
+              <div class="pt-4 border-t border-slate-800/80 no-export">
+                <button @click="exportToImage()" class="w-full bg-slate-950 hover:bg-slate-900 text-white font-bold py-3.5 rounded-2xl text-xs border border-slate-800 shadow-lg flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                  <span>Simpan Kartu Ucapan (.PNG)</span>
+                </button>
+              </div>
+
+            </div>
+          </template>
+
+
+          <!-- LAYOUT TEMA 2: MOODBOARD PIN (Scrapbook Board 3-Kolom Masonry Grid) -->
+          <template x-if="activeProject.theme === 'moodboard'">
+            <div class="bg-[#f4efe4] border-4 border-slate-900 shadow-2xl rounded-none p-6 md:p-10 text-slate-900 space-y-8 relative">
+              <div class="washi-tape-pink absolute -top-4 left-1/2 -translate-x-1/2 w-36 h-7"></div>
+              
+              <div class="text-center space-y-2">
+                <span class="inline-block bg-slate-900 text-white text-[10px] font-bold px-3 py-1 uppercase tracking-widest" x-text="getBadgeText(activeProject.type)"></span>
+                <h1 class="font-sans text-3xl md:text-5xl font-black text-slate-900 uppercase tracking-tight" x-text="activeProject.title"></h1>
+              </div>
+
+              <!-- 3-Column Scrapbook Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Card 1: Counter & Photo (Tilted -2deg) -->
+                <div class="bg-white border-2 border-slate-900 p-5 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] -rotate-1 space-y-5 relative">
+                  <div class="washi-tape-amber absolute -top-3 left-6 w-20 h-5"></div>
+                  
+                  <div class="text-center">
+                    <p class="text-slate-900 text-[10px] font-black uppercase tracking-widest mb-2">Telah Bersama Selama</p>
+                    <div class="grid grid-cols-3 gap-2">
+                      <div class="bg-[#faf8f5] border border-slate-300 p-2 text-center">
+                        <span class="text-slate-900 font-sans text-2xl font-black block" x-text="counter.years"></span>
+                        <span class="text-[8px] uppercase font-bold text-slate-600">Thn</span>
+                      </div>
+                      <div class="bg-[#faf8f5] border border-slate-300 p-2 text-center">
+                        <span class="text-slate-900 font-sans text-2xl font-black block" x-text="counter.months"></span>
+                        <span class="text-[8px] uppercase font-bold text-slate-600">Bln</span>
+                      </div>
+                      <div class="bg-[#faf8f5] border border-slate-300 p-2 text-center">
+                        <span class="text-slate-900 font-sans text-2xl font-black block" x-text="counter.days"></span>
+                        <span class="text-[8px] uppercase font-bold text-slate-600">Hari</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-2">
+                    <div class="bg-white p-2 border border-slate-300 shadow-sm aspect-[4/3] overflow-hidden">
+                      <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover" />
+                    </div>
+                    <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-1.5">
+                      <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                        <button @click="activePhotoIndex = idx" class="w-8 h-8 border border-slate-400">
+                          <img :src="photo" class="w-full h-full object-cover" />
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 2: Romantic Message & Scratch (Tilted +1.5deg) -->
+                <div class="bg-white border-2 border-slate-900 p-5 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] rotate-1 space-y-5 relative">
+                  <div class="washi-tape-pink absolute -top-3 right-6 w-20 h-5"></div>
+                  
+                  <div class="bg-[#faf8f5] border border-slate-300 p-4">
+                    <p class="font-sans text-sm leading-relaxed text-slate-800 whitespace-pre-line" x-text="activeProject.message"></p>
+                  </div>
+
+                  <div x-show="activeProject.scratchMessage" class="bg-[#f3edd9] border border-amber-900/30 p-4 text-center space-y-2">
+                    <span class="text-[10px] font-black uppercase tracking-widest block text-amber-900">Gosok Hadiah Rahasia</span>
+                    <div class="relative w-full max-w-[220px] h-16 mx-auto border border-slate-400 bg-white flex items-center justify-center p-2">
+                      <p class="text-xs font-bold text-rose-600 leading-tight" x-text="activeProject.scratchMessage"></p>
+                      <canvas id="scratchCanvas" width="220" height="64" class="absolute inset-0 cursor-pointer touch-none z-10"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 3: Event Countdown, Vouchers & Bucket (Tilted -1deg) -->
+                <div class="bg-white border-2 border-slate-900 p-5 shadow-[6px_6px_0px_0px_rgba(15,23,42,1)] -rotate-1 space-y-5 md:col-span-2 lg:col-span-1">
+                  
+                  <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-slate-900 text-white p-3 space-y-2 text-center">
+                    <span class="text-[9px] font-bold text-amber-300 uppercase block" x-text="'Event: ' + activeProject.nextEventTitle"></span>
+                    <div class="grid grid-cols-4 gap-1 text-center font-mono text-xs">
+                      <div><span class="block text-sm font-bold" x-text="nextEventCounter.days"></span><span class="text-[7px]">Hari</span></div>
+                      <div><span class="block text-sm font-bold" x-text="nextEventCounter.hours"></span><span class="text-[7px]">Jam</span></div>
+                      <div><span class="block text-sm font-bold" x-text="nextEventCounter.minutes"></span><span class="text-[7px]">Mnt</span></div>
+                      <div><span class="block text-sm font-bold" x-text="nextEventCounter.seconds"></span><span class="text-[7px]">Dtk</span></div>
+                    </div>
+                  </div>
+
+                  <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-2">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-900">Voucher Cinta</h3>
+                    <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                      <div class="border border-slate-300 p-2.5 flex items-center justify-between bg-[#faf8f5]">
+                        <span class="font-bold text-xs" x-text="v.title"></span>
+                        <button @click="claimVoucher(idx)" :disabled="v.claimed" :class="v.claimed ? 'bg-slate-400' : 'bg-slate-900 text-white'" class="px-2.5 py-1 text-[9px] font-bold">
+                          <span x-text="v.claimed ? 'OK' : 'KLAIM'"></span>
+                        </button>
+                      </div>
+                    </template>
+                  </div>
+
+                  <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-2">
+                    <h3 class="text-xs font-black uppercase tracking-wider text-slate-900">Bucket List</h3>
+                    <div class="space-y-1">
+                      <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                        <label @click="toggleBucket(idx)" class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                          <input type="checkbox" :checked="b.done" class="accent-slate-900" />
+                          <span :class="{ 'line-through text-slate-400': b.done }" x-text="b.text"></span>
+                        </label>
+                      </template>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <!-- Export Button -->
+              <div class="pt-4 border-t-2 border-slate-900 no-export">
+                <button @click="exportToImage()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 text-xs shadow-md">
+                  Simpan Kartu Ucapan (.PNG)
+                </button>
+              </div>
+
+            </div>
+          </template>
+
+
+          <!-- LAYOUT TEMA 3: RETRO (Y2K Retro OS Arcade Desktop Layout) -->
+          <template x-if="activeProject.theme === 'retro'">
+            <div class="bg-slate-950 border-2 border-cyan-400 animate-neon-pulse p-4 md:p-8 text-cyan-300 font-pixel space-y-6">
+              
+              <!-- OS Window Top Bar -->
+              <div class="bg-cyan-400 text-slate-950 font-pixel text-sm px-3 py-1 flex items-center justify-between font-bold">
+                <span>LOVE_SYSTEM_V2.0.EXE</span>
+                <span class="cursor-pointer">[X]</span>
+              </div>
+
+              <div class="text-center space-y-1">
+                <span class="inline-block bg-pink-500 text-white font-pixel text-sm px-3 py-0.5 uppercase tracking-widest" x-text="getBadgeText(activeProject.type)"></span>
+                <h1 class="font-pixel text-3xl md:text-5xl text-pink-400 tracking-wide mt-2" x-text="activeProject.title"></h1>
+              </div>
+
+              <!-- Desktop Grid: Multiple OS Windows -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+                
+                <!-- Window 1: Live Counter -->
+                <div class="border border-cyan-400 bg-slate-900/90 p-4 space-y-3">
+                  <div class="bg-cyan-900/50 text-cyan-200 text-xs px-2 py-0.5 border-b border-cyan-400 font-bold">[COUNTER.SYS]</div>
+                  <p class="text-xs text-center uppercase tracking-widest text-cyan-300">Telah Bersama Selama</p>
+                  <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="border border-pink-500 bg-slate-950 p-2">
+                      <span class="text-pink-400 text-2xl font-bold block" x-text="counter.years"></span>
+                      <span class="text-[10px] text-cyan-300 uppercase">Tahun</span>
+                    </div>
+                    <div class="border border-pink-500 bg-slate-950 p-2">
+                      <span class="text-pink-400 text-2xl font-bold block" x-text="counter.months"></span>
+                      <span class="text-[10px] text-cyan-300 uppercase">Bulan</span>
+                    </div>
+                    <div class="border border-pink-500 bg-slate-950 p-2">
+                      <span class="text-pink-400 text-2xl font-bold block" x-text="counter.days"></span>
+                      <span class="text-[10px] text-cyan-300 uppercase">Hari</span>
+                    </div>
+                  </div>
+                  <div class="text-center text-xs opacity-80 font-mono">
+                    <span x-text="counter.hours + 'h:' + counter.minutes + 'm:' + counter.seconds + 's'"></span>
+                  </div>
+                </div>
+
+                <!-- Window 2: Photo Carousel -->
+                <div x-show="activeProject.photos && activeProject.photos.length > 0" class="border border-cyan-400 bg-slate-900/90 p-4 space-y-3">
+                  <div class="bg-cyan-900/50 text-cyan-200 text-xs px-2 py-0.5 border-b border-cyan-400 font-bold">[VIEWER.BMP]</div>
+                  <div class="border border-cyan-400 p-1 aspect-[4/3] overflow-hidden">
+                    <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover" />
+                  </div>
+                  <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-1.5">
+                    <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                      <button @click="activePhotoIndex = idx" class="w-8 h-8 border border-pink-500">
+                        <img :src="photo" class="w-full h-full object-cover" />
+                      </button>
+                    </template>
+                  </div>
+                </div>
+
+                <!-- Window 3: Romantic Message & Scratch -->
+                <div class="border border-cyan-400 bg-slate-900/90 p-4 space-y-3 md:col-span-2 lg:col-span-1">
+                  <div class="bg-cyan-900/50 text-cyan-200 text-xs px-2 py-0.5 border-b border-cyan-400 font-bold">[LETTER.TXT]</div>
+                  <div class="border border-cyan-400/50 p-3 bg-slate-950">
+                    <p class="text-sm leading-relaxed text-cyan-200 whitespace-pre-line" x-text="activeProject.message"></p>
+                  </div>
+
+                  <div x-show="activeProject.scratchMessage" class="border border-pink-500 p-3 bg-slate-950 text-center space-y-2">
+                    <span class="text-xs text-pink-400 uppercase block font-bold">GOSOK HADIAH RAHASIA</span>
+                    <div class="relative w-full max-w-[220px] h-16 mx-auto border border-cyan-400 bg-slate-900 flex items-center justify-center p-2">
+                      <p class="text-xs font-bold text-cyan-300 leading-tight" x-text="activeProject.scratchMessage"></p>
+                      <canvas id="scratchCanvas" width="220" height="64" class="absolute inset-0 cursor-pointer touch-none z-10"></canvas>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Window 4: Countdown Event, Vouchers & Bucket List -->
+                <div class="border border-cyan-400 bg-slate-900/90 p-4 space-y-4 md:col-span-2 lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                  
+                  <!-- Event Countdown -->
+                  <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="border border-pink-500 p-3 bg-slate-950 text-center space-y-2">
+                    <span class="text-xs text-pink-400 uppercase font-bold block" x-text="'EVENT: ' + activeProject.nextEventTitle"></span>
+                    <div class="grid grid-cols-4 gap-1 text-center font-pixel text-sm">
+                      <div><span class="block text-base text-cyan-300 font-bold" x-text="nextEventCounter.days"></span><span class="text-[8px]">HARI</span></div>
+                      <div><span class="block text-base text-cyan-300 font-bold" x-text="nextEventCounter.hours"></span><span class="text-[8px]">JAM</span></div>
+                      <div><span class="block text-base text-cyan-300 font-bold" x-text="nextEventCounter.minutes"></span><span class="text-[8px]">MNT</span></div>
+                      <div><span class="block text-base text-cyan-300 font-bold" x-text="nextEventCounter.seconds"></span><span class="text-[8px]">DTK</span></div>
+                    </div>
+                  </div>
+
+                  <!-- Vouchers -->
+                  <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-2">
+                    <span class="text-xs text-cyan-300 uppercase font-bold block">[VOUCHERS.SYS]</span>
+                    <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                      <div class="border border-cyan-400 p-2 flex items-center justify-between bg-slate-950 text-xs">
+                        <span x-text="v.title"></span>
+                        <button @click="claimVoucher(idx)" :disabled="v.claimed" class="bg-pink-500 text-white px-2 py-0.5 text-xs font-pixel">
+                          <span x-text="v.claimed ? 'OK' : 'KLAIM'"></span>
+                        </button>
+                      </div>
+                    </template>
+                  </div>
+
+                  <!-- Bucket List -->
+                  <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-2">
+                    <span class="text-xs text-cyan-300 uppercase font-bold block">[QUESTS.LOG]</span>
+                    <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                      <label @click="toggleBucket(idx)" class="flex items-center gap-2 text-xs cursor-pointer">
+                        <input type="checkbox" :checked="b.done" class="accent-pink-500" />
+                        <span :class="{ 'line-through text-cyan-600': b.done }" x-text="b.text"></span>
+                      </label>
+                    </template>
+                  </div>
+
+                </div>
+
+              </div>
+
+              <!-- Export Button -->
+              <div class="pt-4 border-t border-cyan-400 no-export">
+                <button @click="exportToImage()" class="w-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-pixel font-bold py-3 text-sm">
+                  DOWNLOAD_CARD.EXE (.PNG)
+                </button>
+              </div>
+
+            </div>
+          </template>
+
+
+          <!-- LAYOUT TEMA 4: VINTAGE PAPER (Classic Scroll / Newspaper Editorial Layout) -->
+          <template x-if="activeProject.theme === 'vintage'">
+            <div class="bg-[#fdf8ed] border-2 border-amber-950/40 shadow-2xl rounded-none p-6 md:p-12 text-stone-900 space-y-8 relative font-mono">
+              
+              <!-- Wax Seal Stamp -->
+              <div class="w-14 h-14 bg-amber-950 text-amber-100 rounded-full border-2 border-amber-700 absolute -top-5 right-6 flex items-center justify-center font-serif text-xs font-bold shadow-lg">
+                SEAL
+              </div>
+
+              <div class="text-center space-y-3 border-b-2 border-amber-950/20 pb-6">
+                <span class="inline-block border border-dashed border-amber-900/50 text-amber-950 text-xs px-4 py-1 uppercase tracking-widest font-bold" x-text="getBadgeText(activeProject.type)"></span>
+                <h1 class="font-mono text-3xl md:text-5xl font-bold text-stone-900 mt-2" x-text="activeProject.title"></h1>
+              </div>
+
+              <!-- Editorial 2-Column Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                
+                <!-- Left Editorial Column (5 Cols) -->
+                <div class="md:col-span-5 space-y-6">
+                  <!-- Live Counter Box -->
+                  <div class="bg-[#ebdcc3] border border-amber-900/30 p-5 text-center">
+                    <p class="text-amber-950 text-[10px] uppercase font-bold tracking-widest mb-3">Telah Bersama Selama</p>
+                    <div class="grid grid-cols-3 gap-2">
+                      <div class="bg-[#faf5eb] border border-amber-900/20 p-2.5">
+                        <span class="text-stone-900 text-2xl font-bold block" x-text="counter.years"></span>
+                        <span class="text-[8px] uppercase font-bold text-amber-900">Tahun</span>
+                      </div>
+                      <div class="bg-[#faf5eb] border border-amber-900/20 p-2.5">
+                        <span class="text-stone-900 text-2xl font-bold block" x-text="counter.months"></span>
+                        <span class="text-[8px] uppercase font-bold text-amber-900">Bulan</span>
+                      </div>
+                      <div class="bg-[#faf5eb] border border-amber-900/20 p-2.5">
+                        <span class="text-stone-900 text-2xl font-bold block" x-text="counter.days"></span>
+                        <span class="text-[8px] uppercase font-bold text-amber-900">Hari</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Photo Frame -->
+                  <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
+                    <div class="bg-[#faf5eb] border border-amber-900/30 p-3 shadow-md aspect-[4/3] overflow-hidden">
+                      <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover" />
+                    </div>
+                    <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
+                      <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                        <button @click="activePhotoIndex = idx" class="w-10 h-10 border border-amber-900/40">
+                          <img :src="photo" class="w-full h-full object-cover" />
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Event Countdown -->
+                  <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-[#ebdcc3] border border-amber-900/30 p-4 text-center space-y-2">
+                    <span class="text-xs uppercase font-bold text-amber-950 block" x-text="'Event: ' + activeProject.nextEventTitle"></span>
+                    <div class="grid grid-cols-4 gap-1 text-xs">
+                      <div><span class="block font-bold text-stone-900" x-text="nextEventCounter.days"></span><span class="text-[7px]">HARI</span></div>
+                      <div><span class="block font-bold text-stone-900" x-text="nextEventCounter.hours"></span><span class="text-[7px]">JAM</span></div>
+                      <div><span class="block font-bold text-stone-900" x-text="nextEventCounter.minutes"></span><span class="text-[7px]">MNT</span></div>
+                      <div><span class="block font-bold text-stone-900" x-text="nextEventCounter.seconds"></span><span class="text-[7px]">DTK</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Editorial Column (7 Cols) -->
+                <div class="md:col-span-7 space-y-6">
+                  <!-- Letter Message -->
+                  <div class="bg-[#faf5eb] border border-amber-900/30 p-6 text-left">
+                    <p class="text-xs md:text-sm leading-relaxed text-stone-800 whitespace-pre-line" x-text="activeProject.message"></p>
+                  </div>
+
+                  <!-- Scratch Card -->
+                  <div x-show="activeProject.scratchMessage" class="bg-[#ebdcc3] border border-amber-900/40 p-4 text-center space-y-2">
+                    <span class="text-xs uppercase font-bold text-amber-950 block">Gosok Hadiah Rahasia</span>
+                    <div class="relative w-full max-w-[240px] h-16 mx-auto border border-amber-900/30 bg-[#faf5eb] flex items-center justify-center p-2">
+                      <p class="text-xs font-bold text-amber-900 leading-tight" x-text="activeProject.scratchMessage"></p>
+                      <canvas id="scratchCanvas" width="240" height="64" class="absolute inset-0 cursor-pointer touch-none z-10"></canvas>
+                    </div>
+                  </div>
+
+                  <!-- Vouchers -->
+                  <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-2 text-left">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-950">Voucher Cinta</h3>
+                    <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                      <div class="border border-amber-900/30 p-3 flex items-center justify-between bg-[#faf5eb]">
+                        <span class="font-bold text-xs" x-text="v.title"></span>
+                        <button @click="claimVoucher(idx)" :disabled="v.claimed" class="bg-amber-950 text-amber-50 px-3 py-1 text-[10px] font-bold">
+                          <span x-text="v.claimed ? 'OK' : 'KLAIM'"></span>
+                        </button>
+                      </div>
+                    </template>
+                  </div>
+
+                  <!-- Bucket List -->
+                  <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-2 text-left">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-950">Target Impian</h3>
+                    <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                      <label @click="toggleBucket(idx)" class="flex items-center gap-2 text-xs cursor-pointer">
+                        <input type="checkbox" :checked="b.done" class="accent-amber-900" />
+                        <span :class="{ 'line-through text-stone-400': b.done }" x-text="b.text"></span>
+                      </label>
+                    </template>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Export Button -->
+              <div class="pt-4 border-t border-amber-900/30 no-export">
+                <button @click="exportToImage()" class="w-full bg-amber-950 hover:bg-stone-900 text-amber-50 font-mono font-bold py-3.5 text-xs">
+                  Simpan Kartu Ucapan (.PNG)
+                </button>
+              </div>
+
+            </div>
+          </template>
+
+
+          <!-- LAYOUT TEMA 5: DOODLE (Spiral Journal / Notebook Page Layout) -->
+          <template x-if="activeProject.theme === 'doodle'">
+            <div class="bg-doodle-grid border-4 border-slate-900 shadow-[14px_14px_0px_0px_rgba(15,23,42,1)] rounded-2xl p-6 md:p-10 text-slate-900 space-y-8 relative font-hand">
+              
+              <div class="text-center space-y-2">
+                <span class="inline-block bg-amber-200 border-2 border-slate-900 text-slate-900 font-hand text-lg px-3 py-0.5 -rotate-2 font-bold shadow-sm" x-text="getBadgeText(activeProject.type)"></span>
+                <h1 class="font-hand text-3xl md:text-5xl font-bold text-slate-900" x-text="activeProject.title"></h1>
+              </div>
+
+              <!-- 2-Page Spiral Book Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                
+                <!-- Page Left -->
+                <div class="space-y-6">
+                  <!-- Live Counter Box -->
+                  <div class="bg-amber-100/80 border-2 border-slate-900 p-5 rotate-1">
+                    <p class="text-slate-900 text-xl font-bold text-center mb-3">Telah Bersama Selama</p>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                      <div class="bg-white border-2 border-slate-900 p-2">
+                        <span class="text-slate-900 text-3xl font-bold block" x-text="counter.years"></span>
+                        <span class="text-sm font-bold">Tahun</span>
+                      </div>
+                      <div class="bg-white border-2 border-slate-900 p-2">
+                        <span class="text-slate-900 text-3xl font-bold block" x-text="counter.months"></span>
+                        <span class="text-sm font-bold">Bulan</span>
+                      </div>
+                      <div class="bg-white border-2 border-slate-900 p-2">
+                        <span class="text-slate-900 text-3xl font-bold block" x-text="counter.days"></span>
+                        <span class="text-sm font-bold">Hari</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Photo Sketch Box -->
+                  <div x-show="activeProject.photos && activeProject.photos.length > 0" class="space-y-3">
+                    <div class="bg-white border-2 border-slate-900 p-2 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] aspect-[4/3] overflow-hidden -rotate-1">
+                      <img :src="activeProject.photos[activePhotoIndex]" class="w-full h-full object-cover" />
+                    </div>
+                    <div x-show="activeProject.photos.length > 1" class="flex justify-center gap-2">
+                      <template x-for="(photo, idx) in activeProject.photos" :key="idx">
+                        <button @click="activePhotoIndex = idx" class="w-10 h-10 border-2 border-slate-900">
+                          <img :src="photo" class="w-full h-full object-cover" />
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+
+                  <!-- Countdown Event -->
+                  <div x-show="activeProject.nextEventTitle && activeProject.nextEventDate" class="bg-rose-100 border-2 border-slate-900 p-4 text-center space-y-2 -rotate-1">
+                    <span class="text-lg font-bold block text-slate-900" x-text="'Event: ' + activeProject.nextEventTitle"></span>
+                    <div class="grid grid-cols-4 gap-1 text-center font-bold text-base">
+                      <div><span class="block text-xl" x-text="nextEventCounter.days"></span><span class="text-xs">Hari</span></div>
+                      <div><span class="block text-xl" x-text="nextEventCounter.hours"></span><span class="text-xs">Jam</span></div>
+                      <div><span class="block text-xl" x-text="nextEventCounter.minutes"></span><span class="text-xs">Mnt</span></div>
+                      <div><span class="block text-xl" x-text="nextEventCounter.seconds"></span><span class="text-xs">Dtk</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Page Right -->
+                <div class="space-y-6">
+                  <!-- Romantic Message -->
+                  <div class="bg-white border-2 border-slate-900 p-6 text-left shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">
+                    <p class="font-hand text-xl md:text-2xl leading-relaxed text-slate-900 whitespace-pre-line" x-text="activeProject.message"></p>
+                  </div>
+
+                  <!-- Scratch Card -->
+                  <div x-show="activeProject.scratchMessage" class="bg-amber-200 border-2 border-slate-900 p-4 text-center space-y-2 rotate-1">
+                    <span class="text-lg font-bold uppercase block">Gosok Hadiah Rahasia</span>
+                    <div class="relative w-full max-w-[240px] h-16 mx-auto border-2 border-slate-900 bg-white flex items-center justify-center p-2">
+                      <p class="text-sm font-bold text-slate-900 leading-tight" x-text="activeProject.scratchMessage"></p>
+                      <canvas id="scratchCanvas" width="240" height="64" class="absolute inset-0 cursor-pointer touch-none z-10"></canvas>
+                    </div>
+                  </div>
+
+                  <!-- Vouchers -->
+                  <div x-show="activeProject.vouchers && activeProject.vouchers.length > 0" class="space-y-2 text-left">
+                    <h3 class="text-xl font-bold uppercase text-slate-900">Voucher Cinta</h3>
+                    <template x-for="(v, idx) in activeProject.vouchers" :key="idx">
+                      <div class="border-2 border-slate-900 p-3 flex items-center justify-between bg-white shadow-[2px_2px_0px_0px_rgba(15,23,42,1)]">
+                        <span class="font-bold text-lg" x-text="v.title"></span>
+                        <button @click="claimVoucher(idx)" :disabled="v.claimed" class="bg-slate-900 text-white px-3 py-1 text-sm font-bold">
+                          <span x-text="v.claimed ? 'OK' : 'KLAIM'"></span>
+                        </button>
+                      </div>
+                    </template>
+                  </div>
+
+                  <!-- Bucket List -->
+                  <div x-show="activeProject.bucketList && activeProject.bucketList.length > 0" class="space-y-2 text-left">
+                    <h3 class="text-xl font-bold uppercase text-slate-900">Target Impian</h3>
+                    <template x-for="(b, idx) in activeProject.bucketList" :key="idx">
+                      <label @click="toggleBucket(idx)" class="flex items-center gap-2 text-lg cursor-pointer font-bold">
+                        <input type="checkbox" :checked="b.done" class="w-5 h-5 accent-slate-900" />
+                        <span :class="{ 'line-through text-slate-400': b.done }" x-text="b.text"></span>
+                      </label>
+                    </template>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Export Button -->
+              <div class="pt-4 border-t-2 border-slate-900 no-export">
+                <button @click="exportToImage()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-hand text-2xl font-bold py-3 shadow-[4px_4px_0px_0px_rgba(245,158,11,1)]">
+                  Simpan Kartu Ucapan (.PNG)
+                </button>
+              </div>
+
+            </div>
+          </template>
 
         </div>
 
